@@ -923,13 +923,13 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 1
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: 05f52fe2-c8f1-4ad7-8c95-f57faeb2541e
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: proyectocreativo
-  organizationId: dise-o-creativo
+  organizationId: 
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

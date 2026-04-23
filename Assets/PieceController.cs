@@ -236,7 +236,18 @@ public class PieceController : MonoBehaviour
     // ─────────────────────────────────────────────
     // GIZMOS
     // ─────────────────────────────────────────────
-#if UNITY_EDITOR
+    /// <summary>Regresa la ficha a casa al ser capturada.</summary>
+    public void ResetToHome()
+    {
+        StopAllCoroutines();
+        _isMoving   = false;
+        _isAtHome   = true;
+        _trackIndex = 0;
+        if (meshTransform != null) meshTransform.localScale = _meshBaseScale;
+        Debug.Log($"[PieceController] {teamColor} ficha {pieceIndex} enviada a casa.");
+    }
+
+    #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         Color c = teamColor == PlayerColor.Yellow ? Color.yellow :

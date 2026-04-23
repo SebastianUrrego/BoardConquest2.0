@@ -1,11 +1,12 @@
 {
   "dependencies": {
-    "com.justinpbarnett.unity-mcp": {
-      "version": "file:D:/Descargas/unity-mcp-master/unity-mcp-master",
+    "com.coplaydev.unity-mcp": {
+      "version": "file:D:/Descargas/unity-mcp-beta/unity-mcp-beta/MCPForUnity",
       "depth": 0,
       "source": "local",
       "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.2"
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.test-framework": "1.1.31"
       }
     },
     "com.unity.ai.navigation": {

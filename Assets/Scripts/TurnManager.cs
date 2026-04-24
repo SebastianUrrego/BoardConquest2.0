@@ -89,9 +89,11 @@ public class TurnManager : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────
-    void BuildPlayers()
+void BuildPlayers()
     {
-        int count = PlayerPrefs.GetInt("PlayerCount", 4);
+        int count = GameInitializer.ActivePlayers > 0
+            ? GameInitializer.ActivePlayers
+            : PlayerPrefs.GetInt("PlayerCount", 2);
         _players.Clear();
         _players.Add(new PlayerData("J1 Amarillo", PlayerColor.Yellow, yellowPieces));
         _players.Add(new PlayerData("J2 Verde",    PlayerColor.Green,  greenPieces));

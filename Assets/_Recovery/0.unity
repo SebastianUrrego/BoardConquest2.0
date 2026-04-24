@@ -1545,12 +1545,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 3
   pieceIndex: 2
+  meshTransform: {fileID: 166514909}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &166514913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1665,12 +1672,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 1
   pieceIndex: 1
+  meshTransform: {fileID: 213742820}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &213742824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2240,6 +2254,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 54151997}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &278253663
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 278253665}
+  - component: {fileID: 278253664}
+  m_Layer: 0
+  m_Name: Tester
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &278253664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278253663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d648bdf3387e68e4886b2487277c4b09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceTestRunner
+  piece: {fileID: 1269355899}
+  stepsOnSpace: 6
+  leaveHomeKey: 104
+  moveKey: 32
+--- !u!4 &278253665
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278253663}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -12.25276, y: 0.05498, z: 5.20968}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &281186411 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 91c1b1e83942c7e4bbcc5518433dea87, type: 3}
@@ -2264,12 +2326,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 2
   pieceIndex: 3
+  meshTransform: {fileID: 281186412}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &281186416
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2693,12 +2762,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 1
   pieceIndex: 0
+  meshTransform: {fileID: 326405247}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &326405251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2723,7 +2799,6 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
-  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2749,7 +2824,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.05, g: 0.05, b: 0.12, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -2798,8 +2873,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.51274866, y: 0.4870063, z: -0.5074375, w: 0.4923625}
-  m_LocalPosition: {x: -1.0256834, y: 28.600708, z: -0.0043700146}
+  m_LocalRotation: {x: -0.11291126, y: 0.8865631, z: -0.3354749, w: -0.29784814}
+  m_LocalPosition: {x: 9.656494, y: 9.727199, z: 12.812026}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2849,26 +2924,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!114 &330585548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330585543}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 928583e744d4b394c8e9d597d032bf3d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraController
-  boardViewPoint: {fileID: 1163315494}
-  followHeight: 6
-  followDistance: 5
-  followFOV: 45
-  boardFOV: 60
-  posSmooth: 0.4
-  rotSmooth: 0.25
-  fovSmooth: 0.4
 --- !u!1 &336245527
 GameObject:
   m_ObjectHideFlags: 0
@@ -4423,12 +4478,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 0
   pieceIndex: 3
+  meshTransform: {fileID: 438488492}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &438488496
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4862,6 +4924,7 @@ MonoBehaviour:
   - {fileID: 166514910}
   - {fileID: 519759877}
   singleDie: {fileID: 1537020378}
+  rollKey: 32
 --- !u!4 &476296817
 Transform:
   m_ObjectHideFlags: 0
@@ -4901,12 +4964,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 2
   pieceIndex: 1
+  meshTransform: {fileID: 479115999}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &479116003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5439,12 +5509,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 3
   pieceIndex: 3
+  meshTransform: {fileID: 519759876}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &519759880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6181,12 +6258,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 0
   pieceIndex: 2
+  meshTransform: {fileID: 613151129}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &613151133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7916,12 +8000,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 1
   pieceIndex: 2
+  meshTransform: {fileID: 810875563}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &810875567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9417,6 +9508,7 @@ MonoBehaviour:
   - {fileID: 1346900984}
   - {fileID: 1352647730}
   - {fileID: 69287757}
+  btnRoll: {fileID: 1369337103}
   panelVictory: {fileID: 734360159}
   txtWinner: {fileID: 2120569321}
   btnReturnMenu: {fileID: 394115971}
@@ -11402,6 +11494,7 @@ RectTransform:
   - {fileID: 1400849697}
   - {fileID: 2111200968}
   - {fileID: 2023780280}
+  - {fileID: 1369337106}
   - {fileID: 734360162}
   - {fileID: 926697763}
   m_Father: {fileID: 0}
@@ -11726,37 +11819,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 597100f15f7d7d640a075d091b3729b2, type: 3}
   m_PrefabInstance: {fileID: 1128288550}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1163315493
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1163315494}
-  m_Layer: 0
-  m_Name: BoardViewPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1163315494
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1163315493}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0.11291126, y: 0.8865631, z: -0.3354749, w: -0.29784814}
-  m_LocalPosition: {x: 9.656494, y: 9.727199, z: 12.812026}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1197777570
 GameObject:
   m_ObjectHideFlags: 0
@@ -12279,12 +12341,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 0
   pieceIndex: 0
+  meshTransform: {fileID: 1206589366}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &1206589370
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12996,12 +13065,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 0
   pieceIndex: 0
+  meshTransform: {fileID: 0}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!1001 &1246693504
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13260,12 +13336,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 1
   pieceIndex: 3
+  meshTransform: {fileID: 1269355895}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &1269355902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13380,12 +13463,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 2
   pieceIndex: 0
+  meshTransform: {fileID: 1273345217}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &1273345221
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13647,74 +13737,74 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardManager
   track:
-  - {fileID: 1244901585}
-  - {fileID: 892545998}
-  - {fileID: 2068750027}
-  - {fileID: 1197777574}
-  - {fileID: 268879711}
-  - {fileID: 1011336174}
-  - {fileID: 871418375}
-  - {fileID: 1373839217}
-  - {fileID: 2004428313}
-  - {fileID: 1973674887}
-  - {fileID: 1077317610}
-  - {fileID: 166197502}
-  - {fileID: 923811425}
-  - {fileID: 1564830923}
-  - {fileID: 695767354}
-  - {fileID: 792818822}
-  - {fileID: 923782859}
-  - {fileID: 1885228087}
-  - {fileID: 113742617}
-  - {fileID: 579211823}
-  - {fileID: 1807124814}
-  - {fileID: 1770749919}
-  - {fileID: 1408108232}
-  - {fileID: 1097548252}
-  - {fileID: 516451434}
-  - {fileID: 739229127}
-  - {fileID: 437502375}
-  - {fileID: 1578686936}
-  - {fileID: 1992698379}
-  - {fileID: 735819399}
-  - {fileID: 259282596}
-  - {fileID: 336245531}
-  - {fileID: 1241269936}
-  - {fileID: 416025593}
-  - {fileID: 899714846}
-  - {fileID: 1953697974}
-  - {fileID: 1595011514}
-  - {fileID: 662362630}
-  - {fileID: 378755500}
-  - {fileID: 2055810380}
-  - {fileID: 709226482}
-  - {fileID: 1528732274}
-  - {fileID: 1473042112}
-  - {fileID: 1687962212}
-  - {fileID: 978258386}
-  - {fileID: 648830053}
-  - {fileID: 998407842}
-  - {fileID: 1481683490}
-  - {fileID: 1629744006}
-  - {fileID: 1312935974}
-  - {fileID: 2139723364}
-  - {fileID: 2038449335}
-  - {fileID: 117559294}
-  - {fileID: 1199693820}
-  - {fileID: 1946708994}
-  - {fileID: 265690132}
-  - {fileID: 102857747}
-  - {fileID: 1335233840}
-  - {fileID: 2029439167}
-  - {fileID: 1199533357}
-  - {fileID: 351834332}
-  - {fileID: 861271375}
-  - {fileID: 1860070851}
   - {fileID: 1793145374}
-  yellowStartIndex: 63
-  greenStartIndex: 47
-  redStartIndex: 29
-  blueStartIndex: 14
+  - {fileID: 1860070851}
+  - {fileID: 861271375}
+  - {fileID: 351834332}
+  - {fileID: 1199533357}
+  - {fileID: 2029439167}
+  - {fileID: 1335233840}
+  - {fileID: 102857747}
+  - {fileID: 265690132}
+  - {fileID: 1946708994}
+  - {fileID: 1199693820}
+  - {fileID: 117559294}
+  - {fileID: 2038449335}
+  - {fileID: 2139723364}
+  - {fileID: 1312935974}
+  - {fileID: 1629744006}
+  - {fileID: 1481683490}
+  - {fileID: 998407842}
+  - {fileID: 648830053}
+  - {fileID: 978258386}
+  - {fileID: 1687962212}
+  - {fileID: 1473042112}
+  - {fileID: 1528732274}
+  - {fileID: 709226482}
+  - {fileID: 2055810380}
+  - {fileID: 378755500}
+  - {fileID: 662362630}
+  - {fileID: 1595011514}
+  - {fileID: 1953697974}
+  - {fileID: 899714846}
+  - {fileID: 416025593}
+  - {fileID: 1241269936}
+  - {fileID: 336245531}
+  - {fileID: 259282596}
+  - {fileID: 735819399}
+  - {fileID: 1992698379}
+  - {fileID: 1578686936}
+  - {fileID: 437502375}
+  - {fileID: 739229127}
+  - {fileID: 516451434}
+  - {fileID: 1097548252}
+  - {fileID: 1408108232}
+  - {fileID: 1770749919}
+  - {fileID: 1807124814}
+  - {fileID: 579211823}
+  - {fileID: 113742617}
+  - {fileID: 1885228087}
+  - {fileID: 923782859}
+  - {fileID: 792818822}
+  - {fileID: 695767354}
+  - {fileID: 1564830923}
+  - {fileID: 923811425}
+  - {fileID: 166197502}
+  - {fileID: 1077317610}
+  - {fileID: 1973674887}
+  - {fileID: 2004428313}
+  - {fileID: 1373839217}
+  - {fileID: 871418375}
+  - {fileID: 1011336174}
+  - {fileID: 268879711}
+  - {fileID: 1197777574}
+  - {fileID: 2068750027}
+  - {fileID: 892545998}
+  - {fileID: 1244901585}
+  yellowStartIndex: 0
+  greenStartIndex: 16
+  redStartIndex: 34
+  blueStartIndex: 49
   yellowHome:
   - {fileID: 0}
   - {fileID: 0}
@@ -14551,6 +14641,127 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -16, y: -16}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1369337102
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1369337106}
+  - component: {fileID: 1369337105}
+  - component: {fileID: 1369337104}
+  - component: {fileID: 1369337103}
+  m_Layer: 0
+  m_Name: "Btn_\U0001F3B2 Tirar Dados"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1369337103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369337102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 1369337104}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1369337104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369337102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.9, g: 0.5, b: 0.1, a: 0.95}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1369337105
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369337102}
+  m_CullTransparentMesh: 1
+--- !u!224 &1369337106
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369337102}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1409513995}
+  m_Father: {fileID: 1078053578}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.38, y: 0.02}
+  m_AnchorMax: {x: 0.62, y: 0.11}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -10, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1373279545
 GameObject:
@@ -15414,6 +15625,143 @@ Transform:
   m_Children: []
   m_Father: {fileID: 54151997}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1409513994
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1409513995}
+  - component: {fileID: 1409513997}
+  - component: {fileID: 1409513996}
+  m_Layer: 0
+  m_Name: Label
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1409513995
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1409513994}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1369337106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1409513996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1409513994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: 'TIRAR [ESPACIO]'
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 28
+  m_fontSizeBase: 28
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 1
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1409513997
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1409513994}
+  m_CullTransparentMesh: 1
 --- !u!1001 &1417811386
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16337,12 +16685,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 3
   pieceIndex: 0
+  meshTransform: {fileID: 1496433087}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &1496433091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20305,12 +20660,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 3
   pieceIndex: 1
+  meshTransform: {fileID: 1855039343}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &1855039347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21209,12 +21571,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 0
   pieceIndex: 1
+  meshTransform: {fileID: 1966681503}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &1966681507
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23324,12 +23693,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceController
   teamColor: 2
   pieceIndex: 2
+  meshTransform: {fileID: 2143803552}
   jumpHeight: 1.5
   jumpDuration: 0.22
   pauseBetweenJumps: 0.04
+  faceDirection: 1
+  landingBounce: 1
+  bounceMagnitude: 0.18
+  bounceDuration: 0.09
   _isAtHome: 1
   _laps: 0
+  _points: 0
   _trackIndex: 0
+  pointsPerLap: 1
 --- !u!114 &2143803556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23492,8 +23868,8 @@ SceneRoots:
   - {fileID: 1630426593}
   - {fileID: 113677529}
   - {fileID: 54151997}
+  - {fileID: 278253665}
   - {fileID: 622337303}
   - {fileID: 1732620165}
   - {fileID: 476296817}
   - {fileID: 1078053578}
-  - {fileID: 1163315494}

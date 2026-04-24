@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// TurnManager - Orquesta toda la logica de turnos.
-/// Fase 1: Tirada inicial para decidir orden (con retirada en empate).
-/// Fase 2: Bucle de turnos entre los jugadores activos.
+/// TurnManager — Orquesta fases de juego.
+///
+/// CONTROLES:
+///   ESPACIO   → tirar dado (tirada inicial Y turno normal)
+///   1 / 2 / 3 / 4 → seleccionar ficha del equipo activo
 /// </summary>
 public class TurnManager : MonoBehaviour
 {
@@ -18,229 +20,283 @@ public class TurnManager : MonoBehaviour
     public PieceController[] redPieces    = new PieceController[4];
     public PieceController[] bluePieces   = new PieceController[4];
 
-    [Header("=== DADO INICIAL ===")]
+    [Header("=== DADO INICIAL (1 dado) ===")]
     public DiceController singleDie;
 
-    private List<PlayerData> _activePlayers = new List<PlayerData>();
-    private int _currentIndex = 0;
+    // ── Estado ──
+    private List<PlayerData> _players = new List<PlayerData>();
+    private int _turnIndex = 0;
 
     public PlayerData CurrentPlayer =>
-        (_activePlayers.Count > 0) ? _activePlayers[_currentIndex] : null;
+        (_players.Count > 0) ? _players[_turnIndex] : null;
 
-    public enum TurnPhase { InitialRoll, WaitingForRoll, WaitingForPieceSelection, MovingPiece, GameOver }
-    public TurnPhase Phase { get; private set; } = TurnPhase.InitialRoll;
+    public enum Phase
+    {
+        InitialWait,       // esperando ESPACIO del jugador actual (tirada inicial)
+        InitialAnimating,  // dado animándose
+        TurnWaitRoll,      // turno normal: esperando ESPACIO
+        TurnAnimating,     // dados animándose
+        TurnWaitPiece,     // esperando que elija ficha (teclas 1-4)
+        TurnMoving,        // ficha moviéndose
+        GameOver
+    }
+    public Phase CurrentPhase { get; private set; } = Phase.InitialWait;
 
-    public int LastDiceResult { get; private set; } = 0;
-    private PieceController _selectedPiece = null;
+    public int  LastDiceTotal   { get; private set; } = 0;
+    public PlayerData InitialTurnPlayer { get; private set; }
 
+    // Flags de input (seteados en Update, consumidos en coroutines)
+    private bool _spaceDown  = false;
+    private int  _pieceKeyDown = -1; // 0-3
+
+    // Ficha seleccionada para el turno
+    private PieceController _movingPiece = null;
+    // Ficha actualmente resaltada
+    public PieceController HighlightedPiece { get; private set; }
+
+    // ── Eventos para la UI ──
+    public event Action<string>           OnStatus;
     public event Action<PlayerData>       OnTurnStart;
-    public event Action<List<PlayerData>> OnOrderDecided;
-    public event Action<string>           OnStatusMessage;
+    public event Action<List<PlayerData>> OnOrderReady;
+    public event Action<PieceController>  OnPieceHighlighted;
 
-    private void Awake()
+    // ─────────────────────────────────────────────
+    void Awake()
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
     }
 
-    private void Start()
+    void Start()
     {
-        BuildPlayerList();
-        StartCoroutine(InitialRollPhase());
+        BuildPlayers();
+        StartCoroutine(WaitOneFrameThenStart());
     }
 
-    private void BuildPlayerList()
+    IEnumerator WaitOneFrameThenStart()
     {
-        int count = PlayerPrefs.GetInt("PlayerCount", 2);
-        _activePlayers.Clear();
-
-        _activePlayers.Add(new PlayerData("J1 Amarillo", PlayerColor.Yellow, yellowPieces));
-        _activePlayers.Add(new PlayerData("J2 Verde",    PlayerColor.Green,  greenPieces));
-        if (count >= 3) _activePlayers.Add(new PlayerData("J3 Rojo", PlayerColor.Red,  redPieces));
-        if (count >= 4) _activePlayers.Add(new PlayerData("J4 Azul", PlayerColor.Blue, bluePieces));
-
-        GameManager.Instance.RegisterPlayers(_activePlayers);
+        yield return null; // deja que GameUI se suscriba
+        StartCoroutine(PhaseInitialRoll());
     }
 
-    // ── FASE 1: Tirada inicial con soporte de empate ──
-    private IEnumerator InitialRollPhase()
+    void Update()
     {
-        Phase = TurnPhase.InitialRoll;
-        List<PlayerData> pending = new List<PlayerData>(_activePlayers);
-        bool orderDecided = false;
+        if (Input.GetKeyDown(KeyCode.Space)) _spaceDown = true;
+        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) _pieceKeyDown = 0;
+        if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) _pieceKeyDown = 1;
+        if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) _pieceKeyDown = 2;
+        if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) _pieceKeyDown = 3;
+    }
 
-        while (!orderDecided)
+    // ─────────────────────────────────────────────
+    void BuildPlayers()
+    {
+        int count = PlayerPrefs.GetInt("PlayerCount", 4);
+        _players.Clear();
+        _players.Add(new PlayerData("J1 Amarillo", PlayerColor.Yellow, yellowPieces));
+        _players.Add(new PlayerData("J2 Verde",    PlayerColor.Green,  greenPieces));
+        if (count >= 3) _players.Add(new PlayerData("J3 Rojo", PlayerColor.Red,  redPieces));
+        if (count >= 4) _players.Add(new PlayerData("J4 Azul", PlayerColor.Blue, bluePieces));
+        GameManager.Instance.RegisterPlayers(_players);
+    }
+
+    // ═══════════════════════════════════════════════
+    // FASE 1 — TIRADA INICIAL
+    // ═══════════════════════════════════════════════
+    IEnumerator PhaseInitialRoll()
+    {
+        List<PlayerData> pending = new List<PlayerData>(_players);
+        bool decided = false;
+
+        while (!decided)
         {
-            OnStatusMessage?.Invoke("Tirada inicial: cada jugador lanza el dado!");
-            yield return new WaitForSeconds(1f);
-
             foreach (PlayerData p in pending)
             {
-                OnStatusMessage?.Invoke($"{p.Name} esta tirando...");
-                yield return new WaitForSeconds(0.5f);
+                InitialTurnPlayer = p;
+                CurrentPhase = Phase.InitialWait;
+                OnStatus?.Invoke($"{p.Name}: presiona [ESPACIO] para lanzar el dado");
 
-                bool rolled = false;
-                int rollVal = 0;
-                System.Action<int> handler = (val) => { rollVal = val; rolled = true; };
-                singleDie.OnRollComplete += handler;
+                // Esperar ESPACIO
+                _spaceDown = false;
+                yield return new WaitUntil(() => _spaceDown);
+                _spaceDown = false;
+
+                // Animar dado
+                CurrentPhase = Phase.InitialAnimating;
+                OnStatus?.Invoke($"{p.Name} tirando...");
+
+                bool done = false; int val = 0;
+                Action<int> h = v => { val = v; done = true; };
+                singleDie.OnRollComplete += h;
                 singleDie.Roll();
-                yield return new WaitUntil(() => rolled);
-                singleDie.OnRollComplete -= handler;
-                p.InitialRoll = rollVal;
+                yield return new WaitUntil(() => done);
+                singleDie.OnRollComplete -= h;
+                p.InitialRoll = val;
 
-                OnStatusMessage?.Invoke($"{p.Name} saco {p.InitialRoll}");
-                yield return new WaitForSeconds(0.8f);
+                OnStatus?.Invoke($"{p.Name} sacó {val}!");
+                yield return new WaitForSeconds(1f);
             }
 
-            int maxRoll = 0;
-            foreach (var p in pending) if (p.InitialRoll > maxRoll) maxRoll = p.InitialRoll;
-
-            List<PlayerData> tied = new List<PlayerData>();
-            foreach (var p in pending) if (p.InitialRoll == maxRoll) tied.Add(p);
+            int max = 0;
+            foreach (var p in pending) if (p.InitialRoll > max) max = p.InitialRoll;
+            var tied = pending.FindAll(p => p.InitialRoll == max);
 
             if (tied.Count == 1)
             {
-                PlayerData first = tied[0];
-                OnStatusMessage?.Invoke($"{first.Name} empieza la partida!");
-                yield return new WaitForSeconds(1f);
+                var first = tied[0];
+                OnStatus?.Invoke($"¡{first.Name} empieza!");
+                yield return new WaitForSeconds(1.2f);
 
-                int idx = _activePlayers.IndexOf(first);
-                List<PlayerData> reordered = new List<PlayerData>();
-                for (int i = 0; i < _activePlayers.Count; i++)
-                    reordered.Add(_activePlayers[(idx + i) % _activePlayers.Count]);
-                _activePlayers = reordered;
-
-                GameManager.Instance.RegisterPlayers(_activePlayers);
-                OnOrderDecided?.Invoke(_activePlayers);
-                orderDecided = true;
+                // Reordenar lista
+                int idx = _players.IndexOf(first);
+                var ordered = new List<PlayerData>();
+                for (int i = 0; i < _players.Count; i++)
+                    ordered.Add(_players[(idx + i) % _players.Count]);
+                _players = ordered;
+                GameManager.Instance.RegisterPlayers(_players);
+                OnOrderReady?.Invoke(_players);
+                decided = true;
             }
             else
             {
-                string names = "";
-                foreach (var p in tied) names += p.Name + ", ";
-                OnStatusMessage?.Invoke($"Empate! Vuelven a tirar: {names.TrimEnd(',', ' ')}");
-                yield return new WaitForSeconds(1.2f);
+                string names = string.Join(", ", tied.ConvertAll(p => p.Name));
+                OnStatus?.Invoke($"Empate ({names}). Vuelven a tirar.");
+                yield return new WaitForSeconds(1.5f);
                 pending = tied;
             }
         }
 
-        _currentIndex = 0;
-        StartCoroutine(TurnLoop());
+        InitialTurnPlayer = null;
+        _turnIndex = 0;
+        StartCoroutine(PhaseTurnLoop());
     }
 
-    // ── FASE 2: Bucle de turnos ──
-    private IEnumerator TurnLoop()
+    // ═══════════════════════════════════════════════
+    // FASE 2 — BUCLE DE TURNOS
+    // ═══════════════════════════════════════════════
+    IEnumerator PhaseTurnLoop()
     {
         while (!GameManager.Instance.GameOver)
         {
-            PlayerData current = _activePlayers[_currentIndex];
-            Phase = TurnPhase.WaitingForRoll;
-
+            PlayerData current = _players[_turnIndex];
+            CurrentPhase = Phase.TurnWaitRoll;
+            HighlightedPiece = null;
+            OnPieceHighlighted?.Invoke(null);
             OnTurnStart?.Invoke(current);
-            OnStatusMessage?.Invoke($"Turno de {current.Name}. Presiona el boton para tirar.");
+            OnStatus?.Invoke($"[{current.Name}] Presiona ESPACIO para tirar los dados");
 
+            // ── Esperar ESPACIO ──
+            _spaceDown = false;
+            yield return new WaitUntil(() => _spaceDown);
+            _spaceDown = false;
+
+            // ── Animar dados ──
+            CurrentPhase = Phase.TurnAnimating;
+            OnStatus?.Invoke("Tirando dados...");
+            bool done2 = false; int total = 0;
+            Action<int> h2 = v => { total = v; done2 = true; };
+            DiceManager.Instance.OnDiceRollComplete += h2;
+            DiceManager.Instance.RollAll();
+            yield return new WaitUntil(() => done2);
+            DiceManager.Instance.OnDiceRollComplete -= h2;
+            LastDiceTotal = total;
+
+            // ── Esperar elección de ficha (teclas 1-4) ──
+            CurrentPhase = Phase.TurnWaitPiece;
+            OnStatus?.Invoke($"Resultado: {total}  |  Elige ficha [1-4]");
+
+            _pieceKeyDown = -1;
+            _movingPiece  = null;
             yield return new WaitUntil(() =>
-                Phase == TurnPhase.WaitingForPieceSelection || GameManager.Instance.GameOver);
-            if (GameManager.Instance.GameOver) break;
+            {
+                if (_pieceKeyDown < 0) return false;
+                int idx = _pieceKeyDown;
+                _pieceKeyDown = -1;
 
-            OnStatusMessage?.Invoke($"Sacaste {LastDiceResult}. Selecciona una ficha.");
+                PieceController[] pool = current.Pieces;
+                if (idx >= pool.Length || pool[idx] == null) return false;
 
-            yield return new WaitUntil(() =>
-                Phase == TurnPhase.MovingPiece || GameManager.Instance.GameOver);
-            if (GameManager.Instance.GameOver) break;
+                PieceController chosen = pool[idx];
+                // No puede moverse si ya está moviendose
+                if (chosen.IsMoving()) return false;
 
-            yield return new WaitUntil(() => _selectedPiece != null && !_selectedPiece.IsMoving());
+                // Resaltar
+                HighlightedPiece = chosen;
+                OnPieceHighlighted?.Invoke(chosen);
+                _movingPiece = chosen;
+                return true;
+            });
 
-            CheckForKill(current, _selectedPiece);
+            // ── Mover ficha ──
+            CurrentPhase = Phase.TurnMoving;
+            OnStatus?.Invoke($"Moviendo {HighlightedPiece.name}...");
 
-            _currentIndex = (_currentIndex + 1) % _activePlayers.Count;
-            _selectedPiece = null;
-            Phase = TurnPhase.WaitingForRoll;
-            yield return new WaitForSeconds(0.5f);
+            // Suscribir vuelta
+            Action<int> lapH = null;
+            lapH = _ => { GameManager.Instance.OnLapCompleted(current); _movingPiece.OnLapCompleted -= lapH; };
+            _movingPiece.OnLapCompleted += lapH;
+
+            if (_movingPiece.IsAtHome) _movingPiece.LeaveHome();
+            else                       _movingPiece.Move(LastDiceTotal);
+
+            yield return new WaitUntil(() => !_movingPiece.IsMoving());
+
+            // ── Revisar kills ──
+            CheckKills(current, _movingPiece);
+
+            // ── Fin turno ──
+            HighlightedPiece = null;
+            OnPieceHighlighted?.Invoke(null);
+            _turnIndex = (_turnIndex + 1) % _players.Count;
+            CurrentPhase = Phase.TurnWaitRoll;
+            yield return new WaitForSeconds(0.3f);
         }
 
-        Phase = TurnPhase.GameOver;
-        OnStatusMessage?.Invoke($"!{GameManager.Instance.Winner?.Name} GANO LA PARTIDA!");
+        CurrentPhase = Phase.GameOver;
+        OnStatus?.Invoke($"¡{GameManager.Instance.Winner?.Name} GANÓ LA PARTIDA!");
     }
 
-    public void RollDice()
+    // ─────────────────────────────────────────────
+    // API PÚBLICA (llamado desde botón UI si existe)
+    // ─────────────────────────────────────────────
+    public void RollDice() { if (CurrentPhase == Phase.TurnWaitRoll) _spaceDown = true; }
+
+    // ─────────────────────────────────────────────
+    // SISTEMA DE MATAR
+    // ─────────────────────────────────────────────
+    void CheckKills(PlayerData attacker, PieceController ap)
     {
-        if (Phase != TurnPhase.WaitingForRoll || GameManager.Instance.GameOver) return;
-        StartCoroutine(RollDiceRoutine());
-    }
-
-    private IEnumerator RollDiceRoutine()
-    {
-        bool done = false;
-        int val = 0;
-        System.Action<int> handler = (v) => { val = v; done = true; };
-        DiceManager.Instance.OnDiceRollComplete += handler;
-        DiceManager.Instance.RollAll();
-        yield return new WaitUntil(() => done);
-        DiceManager.Instance.OnDiceRollComplete -= handler;
-        LastDiceResult = val;
-        Phase = TurnPhase.WaitingForPieceSelection;
-    }
-
-    public void SelectPiece(PieceController piece)
-    {
-        if (Phase != TurnPhase.WaitingForPieceSelection || GameManager.Instance.GameOver) return;
-
-        PlayerData current = CurrentPlayer;
-        bool belongs = false;
-        foreach (var p in current.Pieces)
-            if (p == piece) { belongs = true; break; }
-        if (!belongs) return;
-
-        _selectedPiece = piece;
-        Phase = TurnPhase.MovingPiece;
-
-        System.Action<int> lapHandler = null;
-        lapHandler = (laps) =>
+        int idx = ap.TrackIndex;
+        if (IsSafe(idx)) return;
+        foreach (var def in _players)
         {
-            GameManager.Instance.OnLapCompleted(current);
-            piece.OnLapCompleted -= lapHandler;
-        };
-        piece.OnLapCompleted += lapHandler;
-
-        if (piece.IsAtHome) piece.LeaveHome();
-        else piece.Move(LastDiceResult);
-    }
-
-    private void CheckForKill(PlayerData attacker, PieceController attackerPiece)
-    {
-        int attackerIdx = attackerPiece.TrackIndex;
-        if (IsSafeZone(attackerIdx)) return;
-
-        foreach (PlayerData defender in _activePlayers)
-        {
-            if (defender == attacker) continue;
-            foreach (PieceController defPiece in defender.Pieces)
+            if (def == attacker) continue;
+            foreach (var dp in def.Pieces)
             {
-                if (defPiece == null || defPiece.IsAtHome) continue;
-                if (defPiece.TrackIndex == attackerIdx)
+                if (dp == null || dp.IsAtHome) continue;
+                if (dp.TrackIndex == idx)
                 {
-                    SendToHome(defPiece, defender);
+                    SendHome(dp, def);
                     GameManager.Instance.OnPieceKilled(attacker);
-                    OnStatusMessage?.Invoke($"{attacker.Name} capturo ficha de {defender.Name}! +1 pto");
+                    OnStatus?.Invoke($"{attacker.Name} capturó ficha de {def.Name}! +1 pto");
                 }
             }
         }
     }
 
-    private bool IsSafeZone(int trackIndex)
+    bool IsSafe(int trackIndex)
     {
-        BoardManager bm = BoardManager.Instance;
-        int mod = ((trackIndex % bm.TrackLength) + bm.TrackLength) % bm.TrackLength;
-        return mod == bm.yellowStartIndex || mod == bm.greenStartIndex ||
-               mod == bm.redStartIndex   || mod == bm.blueStartIndex;
+        var bm = BoardManager.Instance;
+        int m = ((trackIndex % bm.TrackLength) + bm.TrackLength) % bm.TrackLength;
+        return m == bm.yellowStartIndex || m == bm.greenStartIndex ||
+               m == bm.redStartIndex   || m == bm.blueStartIndex;
     }
 
-    private void SendToHome(PieceController piece, PlayerData owner)
+    void SendHome(PieceController p, PlayerData owner)
     {
-        Transform[] homeSquares = BoardManager.Instance.GetHomeSquares(owner.Color);
-        if (homeSquares != null && homeSquares.Length > piece.pieceIndex && homeSquares[piece.pieceIndex] != null)
-            piece.transform.position = homeSquares[piece.pieceIndex].position;
-        piece.SendMessage("ResetToHome", SendMessageOptions.DontRequireReceiver);
+        var homes = BoardManager.Instance.GetHomeSquares(owner.Color);
+        if (homes != null && p.pieceIndex < homes.Length && homes[p.pieceIndex] != null)
+            p.transform.position = homes[p.pieceIndex].position;
+        p.SendMessage("ResetToHome", SendMessageOptions.DontRequireReceiver);
     }
 }

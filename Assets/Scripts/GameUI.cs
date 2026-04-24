@@ -1,124 +1,118 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// GameUI - Maneja toda la interfaz durante la partida.
-/// Muestra: turno actual, dados, puntos de cada jugador, mensajes y pantalla de victoria.
+/// GameUI — HUD durante la partida.
+/// Se suscribe a eventos de TurnManager y GameManager.
 /// </summary>
 public class GameUI : MonoBehaviour
 {
-    [Header("=== TURNO ACTUAL ===")]
-    public TextMeshProUGUI txtCurrentTurn;
+    [Header("=== PANEL SUPERIOR IZQUIERDO ===")]
+    public TextMeshProUGUI txtCurrentTurn;   // quién juega ahora
+    public TextMeshProUGUI txtDiceResult;    // resultado del dado
 
-    [Header("=== DADOS ===")]
-    public TextMeshProUGUI txtDiceResult;
-
-    [Header("=== MENSAJES DE ESTADO ===")]
+    [Header("=== MENSAJE DE ESTADO (centro arriba) ===")]
     public TextMeshProUGUI txtStatus;
 
-    [Header("=== MARCADORES (uno por jugador en orden) ===")]
+    [Header("=== MARCADORES (hasta 4) ===")]
     public TextMeshProUGUI[] txtScores = new TextMeshProUGUI[4];
 
-    [Header("=== BOTON TIRAR DADOS ===")]
-    public Button btnRoll;
-
     [Header("=== PANEL DE VICTORIA ===")]
-    public GameObject panelVictory;
-    public TextMeshProUGUI txtWinner;
-    public Button btnReturnMenu;
-
-    [Header("=== ESCENA MENU ===")]
-    public string menuSceneName = "MainMenu";
+    public GameObject          panelVictory;
+    public TextMeshProUGUI     txtWinner;
+    public Button              btnReturnMenu;
+    public string              menuSceneName = "MainMenu";
 
     private List<PlayerData> _players;
 
-    private void Start()
+    void Start()
     {
         if (panelVictory != null) panelVictory.SetActive(false);
-
-        if (btnRoll != null)
-            btnRoll.onClick.AddListener(OnRollButtonPressed);
 
         if (btnReturnMenu != null)
             btnReturnMenu.onClick.AddListener(() =>
                 UnityEngine.SceneManagement.SceneManager.LoadScene(menuSceneName));
 
-        TurnManager.Instance.OnTurnStart     += OnTurnStart;
-        TurnManager.Instance.OnStatusMessage += OnStatusMessage;
-        GameManager.Instance.OnPointsChanged  += OnPointsChanged;
-        GameManager.Instance.OnGameOver       += OnGameOverUI;
+        // Suscribir eventos — nombres del NUEVO TurnManager
+        TurnManager.Instance.OnStatus       += OnStatus;
+        TurnManager.Instance.OnTurnStart    += OnTurnStart;
+        TurnManager.Instance.OnOrderReady   += OnOrderReady;
+
+        GameManager.Instance.OnPointsChanged += OnPointsChanged;
+        GameManager.Instance.OnGameOver      += OnGameOver;
 
         _players = GameManager.Instance.GetPlayers();
-        UpdateAllScores();
+        RefreshScores();
     }
 
-    private void OnDestroy()
+    void Update()
+    {
+        // Actualizar resultado del dado en tiempo real
+        if (TurnManager.Instance == null || txtDiceResult == null) return;
+        int d = TurnManager.Instance.LastDiceTotal;
+        if (d > 0) txtDiceResult.text = $"Dados: {d}";
+    }
+
+    void OnDestroy()
     {
         if (TurnManager.Instance != null)
         {
-            TurnManager.Instance.OnTurnStart     -= OnTurnStart;
-            TurnManager.Instance.OnStatusMessage -= OnStatusMessage;
+            TurnManager.Instance.OnStatus    -= OnStatus;
+            TurnManager.Instance.OnTurnStart -= OnTurnStart;
+            TurnManager.Instance.OnOrderReady -= OnOrderReady;
         }
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnPointsChanged -= OnPointsChanged;
-            GameManager.Instance.OnGameOver      -= OnGameOverUI;
+            GameManager.Instance.OnGameOver      -= OnGameOver;
         }
     }
 
-    private void OnTurnStart(PlayerData player)
-    {
-        if (txtCurrentTurn != null)
-            txtCurrentTurn.text = $"Turno de:\n{player.Name}";
-        if (txtDiceResult != null)
-            txtDiceResult.text = "Dados: --";
-        if (btnRoll != null)
-            btnRoll.interactable = true;
-    }
+    // ── Callbacks ──────────────────────────────────
 
-    private void OnStatusMessage(string msg)
+    void OnStatus(string msg)
     {
         if (txtStatus != null) txtStatus.text = msg;
     }
 
-    private void OnPointsChanged(PlayerData player)
+    void OnTurnStart(PlayerData p)
     {
-        UpdateAllScores();
+        if (txtCurrentTurn != null) txtCurrentTurn.text = $"Turno de:\n{p.Name}";
+        if (txtDiceResult  != null) txtDiceResult.text  = "Dados: --";
+        _players = GameManager.Instance.GetPlayers();
+        RefreshScores();
     }
 
-    private void OnGameOverUI(PlayerData winner)
+    void OnOrderReady(List<PlayerData> ordered)
+    {
+        _players = ordered;
+        RefreshScores();
+    }
+
+    void OnPointsChanged(PlayerData p)
+    {
+        RefreshScores();
+    }
+
+    void OnGameOver(PlayerData winner)
     {
         if (panelVictory != null) panelVictory.SetActive(true);
-        if (txtWinner   != null) txtWinner.text = $"GANO: {winner.Name}\nPuntos: {winner.Score}";
-        if (btnRoll     != null) btnRoll.interactable = false;
+        if (txtWinner    != null)
+            txtWinner.text = $"GANÓ:\n{winner.Name}\n{winner.Score} puntos";
     }
 
-    private void OnRollButtonPressed()
-    {
-        if (btnRoll != null) btnRoll.interactable = false;
-        TurnManager.Instance.RollDice();
-        StartCoroutine(WaitForDiceResult());
-    }
-
-    private IEnumerator WaitForDiceResult()
-    {
-        yield return new WaitUntil(() =>
-            TurnManager.Instance.Phase == TurnManager.TurnPhase.WaitingForPieceSelection ||
-            TurnManager.Instance.Phase == TurnManager.TurnPhase.GameOver);
-        if (txtDiceResult != null)
-            txtDiceResult.text = $"Dados: {TurnManager.Instance.LastDiceResult}";
-    }
-
-    private void UpdateAllScores()
+    void RefreshScores()
     {
         if (_players == null) return;
-        for (int i = 0; i < _players.Count && i < txtScores.Length; i++)
+        for (int i = 0; i < txtScores.Length; i++)
         {
-            if (txtScores[i] != null)
+            if (txtScores[i] == null) continue;
+            if (i < _players.Count)
                 txtScores[i].text = $"{_players[i].Name}\n{_players[i].Score} pts";
+            else
+                txtScores[i].text = "";
         }
     }
 }

@@ -29,7 +29,7 @@ public class DiceManager : MonoBehaviour
     [Header("=== TEST (solo en desarrollo) ===")]
     [Tooltip("Tecla para tirar los dados manualmente")]
     public Key rollKey = Key.R;
-    public bool showTestUI = true;
+    public bool showTestUI = false;
 
     // ─────────────────────────────────────────────
     // ESTADO
@@ -126,15 +126,5 @@ public class DiceManager : MonoBehaviour
     // ─────────────────────────────────────────────
     // UI DE TEST
     // ─────────────────────────────────────────────
-    private void OnGUI()
-    {
-        if (!showTestUI) return;
-
-        GUIStyle style = new GUIStyle(GUI.skin.box) { fontSize = 16 };
-        string estado = _isRolling ? "Tirando..." : $"Dado1: {_dice1Result}  Dado2: {_dice2Result}  Total: {_totalResult}";
-
-        GUI.Box(new Rect(10, 110, 300, 60),
-            $"{estado}\n[R] Tirar dados",
-            style);
-    }
+    
 }

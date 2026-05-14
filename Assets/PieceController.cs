@@ -22,6 +22,10 @@ public class PieceController : MonoBehaviour
     public float jumpDuration      = 0.20f;  // duración de cada casilla
     public float pauseBetweenJumps = 0.03f;  // pausa entre casillas
 
+    [Header("=== AJUSTE VISUAL ===")]
+    [Tooltip("Sube o baja la ficha para que pise exactamente la casilla")]
+    public float yOffset = 0.5f; 
+
     // ── Estado ────────────────────────────────────
     [Header("=== ESTADO ===")]
     [SerializeField] private bool _isAtHome   = true;
@@ -43,7 +47,6 @@ public class PieceController : MonoBehaviour
     // ─────────────────────────────────────────────
     public bool IsMoving() => _isMoving;
 
-    /// <summary>Sale de casa hacia la primera casilla del equipo.</summary>
     public void LeaveHome()
     {
         if (!_isAtHome || _isMoving) return;
@@ -51,7 +54,15 @@ public class PieceController : MonoBehaviour
         _trackIndex = BoardManager.Instance.GetStartIndex(teamColor);
         var target  = BoardManager.Instance.GetSquare(_trackIndex);
         if (target != null)
-            StartCoroutine(JumpTo(transform.position, target.position, null));
+            StartCoroutine(LeaveHomeRoutine(target.position));
+    }
+
+    private IEnumerator LeaveHomeRoutine(Vector3 targetPos)
+    {
+        _isMoving = true;
+        yield return StartCoroutine(JumpTo(transform.position, targetPos, null));
+        _isMoving = false;
+        OnMoveComplete?.Invoke();
     }
 
     /// <summary>Mueve N casillas hacia adelante.</summary>
@@ -105,6 +116,9 @@ public class PieceController : MonoBehaviour
     // ─────────────────────────────────────────────
     private IEnumerator JumpTo(Vector3 from, Vector3 to, Action onArrived)
     {
+        // Aplicar el offset vertical para que pise la casilla correctamente
+        to.y += yOffset;
+
         float elapsed = 0f;
         while (elapsed < jumpDuration)
         {

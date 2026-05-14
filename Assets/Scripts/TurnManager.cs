@@ -74,7 +74,17 @@ public class TurnManager : MonoBehaviour
         else { Destroy(gameObject); return; }
     }
 
+    public bool autoStart = true;
+
     void Start()
+    {
+        if (autoStart)
+        {
+            InitGame();
+        }
+    }
+
+    public void InitGame()
     {
         StartCoroutine(WaitOneFrameThenStart());
     }
@@ -136,11 +146,26 @@ public class TurnManager : MonoBehaviour
         int count = GameInitializer.ActivePlayers > 0
             ? GameInitializer.ActivePlayers
             : PlayerPrefs.GetInt("PlayerCount", 2);
+            
         _players.Clear();
-        _players.Add(new PlayerData("J1 Amarillo", PlayerColor.Yellow, yellowPieces));
-        _players.Add(new PlayerData("J2 Verde",    PlayerColor.Green,  greenPieces));
-        if (count >= 3) _players.Add(new PlayerData("J3 Rojo", PlayerColor.Red,  redPieces));
-        if (count >= 4) _players.Add(new PlayerData("J4 Azul", PlayerColor.Blue, bluePieces));
+        for (int i = 0; i < count; i++)
+        {
+            int colorInt = PlayerPrefs.GetInt("PlayerColor_" + i, i);
+            PlayerColor pColor = (PlayerColor)colorInt;
+            PieceController[] pieces = null;
+            string colorName = "";
+
+            switch (pColor)
+            {
+                case PlayerColor.Yellow: pieces = yellowPieces; colorName = "Amarillo"; break;
+                case PlayerColor.Green:  pieces = greenPieces;  colorName = "Verde";    break;
+                case PlayerColor.Red:    pieces = redPieces;    colorName = "Rojo";     break;
+                case PlayerColor.Blue:   pieces = bluePieces;   colorName = "Azul";     break;
+            }
+
+            _players.Add(new PlayerData($"J{i + 1} {colorName}", pColor, pieces));
+        }
+
         GameManager.Instance.RegisterPlayers(_players);
     }
 

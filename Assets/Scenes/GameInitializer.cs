@@ -19,7 +19,17 @@ public class GameInitializer : MonoBehaviour
     // Cuántos jugadores están activos esta partida
     public static int ActivePlayers { get; private set; }
 
-    private void Awake()
+    public bool autoStart = true;
+
+    private void Start()
+    {
+        if (autoStart)
+        {
+            InitGame();
+        }
+    }
+
+    public void InitGame()
     {
         // Lee la cantidad guardada desde el menú
         ActivePlayers = PlayerPrefs.GetInt("PlayerCount", defaultPlayerCount);
@@ -30,15 +40,25 @@ public class GameInitializer : MonoBehaviour
 
     private void SetupPieces()
     {
-        // Siempre activos: Amarillo y Verde (jugadores 1 y 2)
-        SetTeamActive(yellowPieces, true);
-        SetTeamActive(greenPieces,  true);
+        // Desactivar todos por defecto
+        SetTeamActive(yellowPieces, false);
+        SetTeamActive(greenPieces, false);
+        SetTeamActive(redPieces, false);
+        SetTeamActive(bluePieces, false);
 
-        // Rojo activo solo si hay 3 o 4 jugadores
-        SetTeamActive(redPieces,  ActivePlayers >= 3);
-
-        // Azul activo solo si hay 4 jugadores
-        SetTeamActive(bluePieces, ActivePlayers >= 4);
+        // Activar solo los que hayan sido seleccionados
+        for (int i = 0; i < ActivePlayers; i++)
+        {
+            int colorInt = PlayerPrefs.GetInt("PlayerColor_" + i, i); // 0=Yellow, 1=Green, 2=Red, 3=Blue
+            
+            switch (colorInt)
+            {
+                case 0: SetTeamActive(yellowPieces, true); break;
+                case 1: SetTeamActive(greenPieces, true); break;
+                case 2: SetTeamActive(redPieces, true); break;
+                case 3: SetTeamActive(bluePieces, true); break;
+            }
+        }
     }
 
     private void SetTeamActive(GameObject[] pieces, bool active)

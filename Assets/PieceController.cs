@@ -130,6 +130,18 @@ public class PieceController : MonoBehaviour
         onArrived?.Invoke();
     }
 
+    // Expandir bounds del MeshRenderer durante el movimiento
+    // para evitar que el frustum culling oculte la ficha al saltar
+    private MeshRenderer _mr;
+    private void OnEnable() { _mr = GetComponent<MeshRenderer>(); }
+    private void LateUpdate()
+    {
+        if (_mr == null || !_isMoving) return;
+        _mr.bounds = new UnityEngine.Bounds(
+            transform.position + Vector3.up,
+            new Vector3(1f, 4f, 1f));
+    }
+
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {

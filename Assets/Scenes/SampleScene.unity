@@ -2891,7 +2891,12 @@ MonoBehaviour:
   cameraHeight: 13
   distanceBack: 10
   fov: 60
-  rotationSmoothSpeed: 3
+  boardSmoothSpeed: 3
+  zoomHeight: 4.5
+  zoomDistance: 4
+  zoomFOV: 40
+  zoomTransition: 0.6
+  returnTransition: 0.8
 --- !u!1 &336245527
 GameObject:
   m_ObjectHideFlags: 0
@@ -6277,15 +6282,15 @@ MonoBehaviour:
   - {fileID: 810875562}
   - {fileID: 1269355894}
   redPieces:
-  - {fileID: 1496433086}
-  - {fileID: 1855039342}
-  - {fileID: 166514908}
-  - {fileID: 519759875}
-  bluePieces:
   - {fileID: 1273345216}
   - {fileID: 479115998}
   - {fileID: 2143803551}
   - {fileID: 281186411}
+  bluePieces:
+  - {fileID: 1496433086}
+  - {fileID: 1855039342}
+  - {fileID: 166514908}
+  - {fileID: 519759875}
   defaultPlayerCount: 2
 --- !u!1 &647934495 stripped
 GameObject:

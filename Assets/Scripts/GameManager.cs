@@ -6,6 +6,7 @@ using UnityEngine;
 /// GameManager — Singleton central del juego.
 /// Maneja: jugadores activos, puntos, condicion de victoria y estado global.
 /// </summary>
+[DefaultExecutionOrder(-100)]
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -49,6 +50,16 @@ public class GameManager : MonoBehaviour
         OnPointsChanged?.Invoke(player);
         CheckWinCondition(player);
     }
+
+/// <summary>Resta puntos a un jugador (mínimo 0). Llamado por el sistema de minas.</summary>
+public void RemovePoints(PlayerData player, int amount)
+{
+    if (GameOver) return;
+    player.Score = Mathf.Max(0, player.Score - amount);
+    Debug.Log($"[GameManager] {player.Name} perdio {amount} puntos. Total: {player.Score}");
+    OnPointsChanged?.Invoke(player);
+}
+
 
     public void OnPieceKilled(PlayerData attacker) => AddPoints(attacker, pointsPerKill);
     public void OnLapCompleted(PlayerData player)  => AddPoints(player, pointsPerLap);

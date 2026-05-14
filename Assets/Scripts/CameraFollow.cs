@@ -1,37 +1,258 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// CameraFollow — cámara orbital que sigue al equipo activo.
+///
+/// MODOS:
+///   BOARD  : vista general del equipo activo (comportamiento anterior).
+///   ZOOM   : zoom suave sobre la ficha seleccionada al presionar 1-4.
+///   RETURN : transición suave de vuelta a BOARD al terminar el movimiento.
+/// </summary>
 [RequireComponent(typeof(Camera))]
 public class CameraFollow : MonoBehaviour
 {
-    [Header("=== CENTRO DEL TABLERO ===")]
-    public bool autoDetectCenter = true;
-    public float boardCenterX = -2.43f;
-    public float boardCenterZ = -0.28f;
+    // ── Vista general ────────────────────────────
+    [Header("=== VISTA GENERAL ===")]
+    public bool  autoDetectCenter  = true;
+    public float boardCenterX      = -2.43f;
+    public float boardCenterZ      = -0.28f;
+    public float cameraHeight      = 13f;
+    public float distanceBack      = 10f;
+    public float fov               = 60f;
+    public float boardSmoothSpeed  = 3f;   // suavidad rotación orbital
 
-    [Header("=== VISTA (BARICENTRO) ===")]
-    [Tooltip("Altura de la cámara sobre el tablero")]
-    public float cameraHeight = 13f;
-    [Tooltip("Distancia hacia ATRÁS desde el centro del tablero")]
-    public float distanceBack = 10f;
-    [Tooltip("Campo de visión (Zoom)")]
-    public float fov = 60f;
-    [Tooltip("Velocidad con la que la cámara gira para seguir a las fichas")]
-    public float rotationSmoothSpeed = 3f;
+    // ── Zoom sobre ficha ─────────────────────────
+    [Header("=== ZOOM EN FICHA ===")]
+    [Tooltip("Altura de la cámara al hacer zoom en la ficha")]
+    public float zoomHeight        = 4.5f;
+    [Tooltip("Distancia detrás de la ficha al hacer zoom")]
+    public float zoomDistance      = 4f;
+    [Tooltip("FOV durante el zoom (más pequeño = más cerca)")]
+    public float zoomFOV           = 40f;
+    [Tooltip("Duración de la transición de zoom (segundos)")]
+    public float zoomTransition    = 0.6f;
+    [Tooltip("Duración de la transición de vuelta al tablero")]
+    public float returnTransition  = 0.8f;
 
-    private Camera _cam;
-    private PlayerData _currentPlayer;
+    // ── Internos ─────────────────────────────────
+    private Camera         _cam;
+    private PlayerData     _currentPlayer;
+    private PieceController _zoomTarget;     // ficha a enfocar (null = modo tablero)
 
-    void Awake() 
-    { 
-        _cam = GetComponent<Camera>(); 
-    }
+    private enum CamMode { Board, ZoomingIn, ZoomedIn, ZoomingOut }
+    private CamMode _mode = CamMode.Board;
+
+    // Snapshots para interpolar
+    private Vector3    _snapPos;
+    private Quaternion _snapRot;
+    private float      _snapFOV;
+    private float      _transTimer;
+    private float      _transDuration;
+
+    // ─────────────────────────────────────────────
+    void Awake()  { _cam = GetComponent<Camera>(); }
 
     void Start()
     {
         if (autoDetectCenter) DetectBoardCenter();
         _cam.fieldOfView = fov;
         StartCoroutine(SubscribeNextFrame());
+    }
+
+    void OnDestroy()
+    {
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.OnTurnStart        -= HandleTurnStart;
+            TurnManager.Instance.OnPieceHighlighted -= HandlePieceHighlighted;
+        }
+    }
+
+    IEnumerator SubscribeNextFrame()
+    {
+        yield return null;
+        var tm = TurnManager.Instance;
+        if (tm == null) yield break;
+        tm.OnTurnStart        += HandleTurnStart;
+        tm.OnPieceHighlighted += HandlePieceHighlighted;
+        if (tm.CurrentPlayer != null) HandleTurnStart(tm.CurrentPlayer);
+    }
+
+    // ── Callbacks ────────────────────────────────
+
+    void HandleTurnStart(PlayerData player)
+    {
+        _currentPlayer = player;
+        // Al cambiar de turno volver a vista de tablero
+        StartZoomOut();
+    }
+
+    void HandlePieceHighlighted(PieceController piece)
+    {
+        if (piece != null)
+        {
+            _zoomTarget = piece;
+            StartZoomIn();
+        }
+        else
+        {
+            // Ficha terminó de moverse → volver al tablero
+            StartZoomOut();
+        }
+    }
+
+    // ── Iniciar transiciones ──────────────────────
+
+    void StartZoomIn()
+    {
+        if (_mode == CamMode.ZoomedIn || _mode == CamMode.ZoomingIn) return;
+        _snapPos      = transform.position;
+        _snapRot      = transform.rotation;
+        _snapFOV      = _cam.fieldOfView;
+        _transTimer   = 0f;
+        _transDuration = zoomTransition;
+        _mode         = CamMode.ZoomingIn;
+    }
+
+    void StartZoomOut()
+    {
+        if (_mode == CamMode.Board || _mode == CamMode.ZoomingOut) return;
+        _snapPos      = transform.position;
+        _snapRot      = transform.rotation;
+        _snapFOV      = _cam.fieldOfView;
+        _transTimer   = 0f;
+        _transDuration = returnTransition;
+        _mode         = CamMode.ZoomingOut;
+        _zoomTarget   = null;
+    }
+
+    // ── Update ────────────────────────────────────
+
+    void LateUpdate()
+    {
+        switch (_mode)
+        {
+            case CamMode.Board:      UpdateBoard();      break;
+            case CamMode.ZoomingIn:  UpdateZoomIn();     break;
+            case CamMode.ZoomedIn:   UpdateZoomedIn();   break;
+            case CamMode.ZoomingOut: UpdateZoomOut();    break;
+        }
+    }
+
+    // ── MODO TABLERO: orbital suave ───────────────
+    void UpdateBoard()
+    {
+        if (_currentPlayer == null) return;
+
+        Vector3 midpoint = GetMidpoint(_currentPlayer.Pieces);
+        Vector3 center   = new Vector3(boardCenterX, 0, boardCenterZ);
+        Vector3 dir      = (midpoint - center);
+        dir.y = 0;
+        if (dir.sqrMagnitude < 0.1f) dir = Vector3.forward;
+        dir.Normalize();
+
+        Vector3    targetPos = center - dir * distanceBack + Vector3.up * cameraHeight;
+        Quaternion targetRot = Quaternion.LookRotation(midpoint - targetPos);
+
+        transform.position = targetPos;
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot,
+                                              Time.deltaTime * boardSmoothSpeed);
+        _cam.fieldOfView   = Mathf.Lerp(_cam.fieldOfView, fov, Time.deltaTime * 5f);
+    }
+
+    // ── ZOOM ENTRANDO ─────────────────────────────
+    void UpdateZoomIn()
+    {
+        _transTimer += Time.deltaTime;
+        float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_transTimer / _transDuration));
+
+        Vector3    targetPos = CalcZoomPos();
+        Quaternion targetRot = CalcZoomRot(targetPos);
+
+        transform.position = Vector3.Lerp(_snapPos, targetPos, t);
+        transform.rotation = Quaternion.Slerp(_snapRot, targetRot, t);
+        _cam.fieldOfView   = Mathf.Lerp(_snapFOV, zoomFOV, t);
+
+        if (t >= 1f) _mode = CamMode.ZoomedIn;
+    }
+
+    // ── ZOOM ACTIVO: sigue la ficha en tiempo real ─
+    void UpdateZoomedIn()
+    {
+        if (_zoomTarget == null) { StartZoomOut(); return; }
+        Vector3    targetPos = CalcZoomPos();
+        Quaternion targetRot = CalcZoomRot(targetPos);
+
+        // Seguimiento suave durante el movimiento
+        transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 8f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 8f);
+    }
+
+    // ── ZOOM SALIENDO ─────────────────────────────
+    void UpdateZoomOut()
+    {
+        _transTimer += Time.deltaTime;
+        float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_transTimer / _transDuration));
+
+        Vector3    targetPos = CalcBoardPos();
+        Quaternion targetRot = CalcBoardRot(targetPos);
+
+        transform.position = Vector3.Lerp(_snapPos, targetPos, t);
+        transform.rotation = Quaternion.Slerp(_snapRot, targetRot, t);
+        _cam.fieldOfView   = Mathf.Lerp(_snapFOV, fov, t);
+
+        if (t >= 1f) _mode = CamMode.Board;
+    }
+
+    // ── Helpers de posición ───────────────────────
+
+    /// Posición de zoom: detrás y arriba de la ficha
+    Vector3 CalcZoomPos()
+    {
+        if (_zoomTarget == null) return transform.position;
+        Vector3 piecePos = _zoomTarget.transform.position;
+        Vector3 center   = new Vector3(boardCenterX, 0, boardCenterZ);
+        // Dirección desde el centro hacia la ficha
+        Vector3 dir = (piecePos - center);
+        dir.y = 0;
+        if (dir.sqrMagnitude < 0.1f) dir = Vector3.forward;
+        dir.Normalize();
+        return piecePos + dir * zoomDistance + Vector3.up * zoomHeight;
+    }
+
+    Quaternion CalcZoomRot(Vector3 fromPos)
+    {
+        if (_zoomTarget == null) return transform.rotation;
+        Vector3 lookAt = _zoomTarget.transform.position + Vector3.up * 0.5f;
+        return Quaternion.LookRotation(lookAt - fromPos);
+    }
+
+    Vector3 CalcBoardPos()
+    {
+        if (_currentPlayer == null) return transform.position;
+        Vector3 midpoint = GetMidpoint(_currentPlayer.Pieces);
+        Vector3 center   = new Vector3(boardCenterX, 0, boardCenterZ);
+        Vector3 dir = (midpoint - center); dir.y = 0;
+        if (dir.sqrMagnitude < 0.1f) dir = Vector3.forward;
+        dir.Normalize();
+        return center - dir * distanceBack + Vector3.up * cameraHeight;
+    }
+
+    Quaternion CalcBoardRot(Vector3 fromPos)
+    {
+        Vector3 midpoint = _currentPlayer != null
+            ? GetMidpoint(_currentPlayer.Pieces)
+            : new Vector3(boardCenterX, 0, boardCenterZ);
+        return Quaternion.LookRotation(midpoint - fromPos);
+    }
+
+    Vector3 GetMidpoint(PieceController[] pieces)
+    {
+        Vector3 sum = Vector3.zero; int count = 0;
+        foreach (var p in pieces)
+            if (p != null) { sum += p.transform.position; count++; }
+        return count == 0 ? new Vector3(boardCenterX, 0, boardCenterZ) : sum / count;
     }
 
     void DetectBoardCenter()
@@ -41,94 +262,18 @@ public class CameraFollow : MonoBehaviour
         Vector3 sum = Vector3.zero; int cnt = 0;
         foreach (var t in bm.track) { if (t != null) { sum += t.position; cnt++; } }
         if (cnt == 0) return;
-        Vector3 center = sum / cnt;
-        boardCenterX = center.x; boardCenterZ = center.z;
-    }
-
-    IEnumerator SubscribeNextFrame()
-    {
-        yield return null;
-        var tm = TurnManager.Instance;
-        if (tm != null) {
-            tm.OnTurnStart += HandleTurnStart;
-            if (tm.CurrentPlayer != null) HandleTurnStart(tm.CurrentPlayer);
-        }
-    }
-
-    void OnDestroy() 
-    { 
-        if (TurnManager.Instance != null) TurnManager.Instance.OnTurnStart -= HandleTurnStart; 
-    }
-
-    void HandleTurnStart(PlayerData player)
-    {
-        if (player == null) return;
-        _currentPlayer = player;
-    }
-
-    void LateUpdate()
-    {
-        if (_currentPlayer == null || _currentPlayer.Pieces == null || _currentPlayer.Pieces.Length == 0)
-            return;
-
-        Vector3 midpoint = GetMidpoint(_currentPlayer.Pieces);
-        Vector3 center = new Vector3(boardCenterX, 0, boardCenterZ);
-
-        // Vector de dirección desde el centro hacia el punto medio de las fichas
-        Vector3 dirToMidpoint = midpoint - center;
-        dirToMidpoint.y = 0; // Mantener en plano horizontal para los cálculos de posición
-
-        if (dirToMidpoint.sqrMagnitude < 0.1f)
-            dirToMidpoint = Vector3.forward; // fallback si están exactamente en el centro
-
-        dirToMidpoint.Normalize();
-
-        // Posición de la cámara: la movemos hacia ATRÁS desde el centro (eje opuesto al punto medio)
-        Vector3 targetPos = center - (dirToMidpoint * distanceBack) + (Vector3.up * cameraHeight);
-        transform.position = targetPos;
-
-        // Rotación: mirar hacia el punto medio de las fichas
-        // Como la cámara está detrás del centro, al mirar al midpoint verá el centro del tablero en el medio de la pantalla
-        Quaternion targetRotation = Quaternion.LookRotation(midpoint - transform.position);
-
-        // Interpolar suavemente la rotación (efecto orbital suave al moverse)
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSmoothSpeed);
-    }
-
-    Vector3 GetMidpoint(PieceController[] pieces)
-    {
-        Vector3 sum = Vector3.zero;
-        int count = 0;
-        foreach (var p in pieces)
-        {
-            if (p != null)
-            {
-                sum += p.transform.position;
-                count++;
-            }
-        }
-        if (count == 0) return new Vector3(boardCenterX, 0, boardCenterZ);
-        return sum / count;
+        boardCenterX = (sum / cnt).x;
+        boardCenterZ = (sum / cnt).z;
     }
 
 #if UNITY_EDITOR
-    [UnityEditor.MenuItem("CameraFollow/Test Recenter", false)]
-    static void MenuRecenter()
-    {
-        var cf = UnityEngine.Object.FindObjectOfType<CameraFollow>();
-        if (cf != null) { cf.DetectBoardCenter(); }
-    }
-
     void OnDrawGizmosSelected()
     {
         Vector3 c = new Vector3(boardCenterX, 0f, boardCenterZ);
-        Gizmos.color = new Color(0f, 1f, 0f, 0.3f); 
+        Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
         Gizmos.DrawWireSphere(c, 1f);
-        
-        #if UNITY_EDITOR
-        UnityEditor.Handles.color = new Color(1f, 1f, 0f, 0.5f);
+        UnityEditor.Handles.color = new Color(1f, 1f, 0f, 0.4f);
         UnityEditor.Handles.DrawWireDisc(c + Vector3.up * cameraHeight, Vector3.up, distanceBack);
-        #endif
     }
 #endif
 }

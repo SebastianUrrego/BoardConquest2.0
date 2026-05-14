@@ -7,9 +7,11 @@ using UnityEngine;
 /// TurnManager — Orquesta fases de juego.
 ///
 /// CONTROLES:
-///   ESPACIO   → tirar dado (tirada inicial Y turno normal)
+///   ESPACIO     → tirar dado (tirada inicial Y turno normal)
+///   0-4         → cuantas minas usar (en fase TurnWaitMines)
 ///   1 / 2 / 3 / 4 → seleccionar ficha del equipo activo
 /// </summary>
+[DefaultExecutionOrder(100)]
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
@@ -33,26 +35,31 @@ public class TurnManager : MonoBehaviour
     public enum Phase
     {
         InitialWait,       // esperando ESPACIO del jugador actual (tirada inicial)
-        InitialAnimating,  // dado animándose
+        InitialAnimating,  // dado animandose
         TurnWaitRoll,      // turno normal: esperando ESPACIO
-        TurnAnimating,     // dados animándose
+        TurnAnimating,     // dados animandose
+        TurnWaitMines,     // esperando que decida cuantas minas usar (0-4)
         TurnWaitPiece,     // esperando que elija ficha (teclas 1-4)
-        TurnMoving,        // ficha moviéndose
+        TurnMoving,        // ficha moviendose
         GameOver
     }
     public Phase CurrentPhase { get; private set; } = Phase.InitialWait;
 
-    public int  LastDiceTotal   { get; private set; } = 0;
-    public PlayerData InitialTurnPlayer { get; private set; }
+    public int        LastDiceTotal      { get; private set; } = 0;
+    public int        MinesUsedThisTurn  { get; private set; } = 0;
+    public PlayerData InitialTurnPlayer  { get; private set; }
 
     // Flags de input (seteados en Update, consumidos en coroutines)
-    private bool _spaceDown  = false;
-    private int  _pieceKeyDown = -1; // 0-3
+    private bool _spaceDown    = false;
+    private int  _pieceKeyDown = -1;  // 0-3
+    private int  _mineKeyDown  = -1;  // 0-4: cantidad de minas a usar
+
+    // Posicion del track ANTES de mover (para saber donde colocar minas)
+    private int _pieceTrackBeforeMove = 0;
 
     // Ficha seleccionada para el turno
-    private PieceController _movingPiece = null;
-    // Ficha actualmente resaltada
-    public PieceController HighlightedPiece { get; private set; }
+    private PieceController _movingPiece  = null;
+    public  PieceController HighlightedPiece { get; private set; }
 
     // ── Eventos para la UI ──
     public event Action<string>           OnStatus;
@@ -69,27 +76,42 @@ public class TurnManager : MonoBehaviour
 
     void Start()
     {
-        BuildPlayers();
         StartCoroutine(WaitOneFrameThenStart());
     }
 
     IEnumerator WaitOneFrameThenStart()
     {
-        yield return null; // deja que GameUI se suscriba
+        yield return null;
+        BuildPlayers();
         StartCoroutine(PhaseInitialRoll());
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space)) _spaceDown = true;
-        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) _pieceKeyDown = 0;
-        if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) _pieceKeyDown = 1;
-        if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) _pieceKeyDown = 2;
-        if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) _pieceKeyDown = 3;
+
+        // Seleccion de ficha (1-4) — solo fuera de la fase de minas
+        if (CurrentPhase != Phase.TurnWaitMines)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) _pieceKeyDown = 0;
+            if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) _pieceKeyDown = 1;
+            if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) _pieceKeyDown = 2;
+            if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) _pieceKeyDown = 3;
+        }
+
+        // Seleccion de minas (0-4) — solo en la fase de minas
+        if (CurrentPhase == Phase.TurnWaitMines)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) _mineKeyDown = 0;
+            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) _mineKeyDown = 1;
+            if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) _mineKeyDown = 2;
+            if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) _mineKeyDown = 3;
+            if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) _mineKeyDown = 4;
+        }
     }
 
     // ─────────────────────────────────────────────
-void BuildPlayers()
+    void BuildPlayers()
     {
         int count = GameInitializer.ActivePlayers > 0
             ? GameInitializer.ActivePlayers
@@ -118,24 +140,30 @@ void BuildPlayers()
                 CurrentPhase = Phase.InitialWait;
                 OnStatus?.Invoke($"{p.Name}: presiona [ESPACIO] para lanzar el dado");
 
-                // Esperar ESPACIO
                 _spaceDown = false;
                 yield return new WaitUntil(() => _spaceDown);
                 _spaceDown = false;
 
-                // Animar dado
                 CurrentPhase = Phase.InitialAnimating;
                 OnStatus?.Invoke($"{p.Name} tirando...");
 
                 bool done = false; int val = 0;
                 Action<int> h = v => { val = v; done = true; };
+                singleDie.StopAllCoroutines();
+                {
+                    var f = typeof(DiceController).GetField("_isRolling",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    f?.SetValue(singleDie, false);
+                }
                 singleDie.OnRollComplete += h;
                 singleDie.Roll();
-                yield return new WaitUntil(() => done);
+                float _t = 0f;
+                while (!done && _t < 5f) { _t += Time.deltaTime; yield return null; }
+                if (!done) val = UnityEngine.Random.Range(1, 7);
                 singleDie.OnRollComplete -= h;
                 p.InitialRoll = val;
 
-                OnStatus?.Invoke($"{p.Name} sacó {val}!");
+                OnStatus?.Invoke($"{p.Name} saco {val}!");
                 yield return new WaitForSeconds(1f);
             }
 
@@ -146,10 +174,9 @@ void BuildPlayers()
             if (tied.Count == 1)
             {
                 var first = tied[0];
-                OnStatus?.Invoke($"¡{first.Name} empieza!");
+                OnStatus?.Invoke($"!{first.Name} empieza!");
                 yield return new WaitForSeconds(1.2f);
 
-                // Reordenar lista
                 int idx = _players.IndexOf(first);
                 var ordered = new List<PlayerData>();
                 for (int i = 0; i < _players.Count; i++)
@@ -181,8 +208,9 @@ void BuildPlayers()
         while (!GameManager.Instance.GameOver)
         {
             PlayerData current = _players[_turnIndex];
-            CurrentPhase = Phase.TurnWaitRoll;
-            HighlightedPiece = null;
+            CurrentPhase      = Phase.TurnWaitRoll;
+            MinesUsedThisTurn = 0;
+            HighlightedPiece  = null;
             OnPieceHighlighted?.Invoke(null);
             OnTurnStart?.Invoke(current);
             OnStatus?.Invoke($"[{current.Name}] Presiona ESPACIO para tirar los dados");
@@ -203,10 +231,45 @@ void BuildPlayers()
             DiceManager.Instance.OnDiceRollComplete -= h2;
             LastDiceTotal = total;
 
-            // ── Esperar elección de ficha (teclas 1-4) ──
-            CurrentPhase = Phase.TurnWaitPiece;
-            OnStatus?.Invoke($"Resultado: {total}  |  Elige ficha [1-4]");
+            // ── Fase de minas: el jugador decide cuantas usar ──
+            int maxMines = MineSystem.Instance != null
+                ? MineSystem.Instance.MaxMinesToUse(current.Color, total)
+                : 0;
 
+            if (maxMines > 0)
+            {
+                CurrentPhase  = Phase.TurnWaitMines;
+                _mineKeyDown  = -1;
+                int minesLeft = MineSystem.Instance.GetMinesRemaining(current.Color);
+                OnStatus?.Invoke(
+                    $"Resultado: {total}  |  Minas disponibles: {minesLeft}  |  " +
+                    $"Usa [0-{maxMines}] minas (cada una resta 1 avance)");
+
+                // Esperar que el jugador presione una tecla valida
+                yield return new WaitUntil(() =>
+                {
+                    if (_mineKeyDown < 0) return false;
+                    int chosen = _mineKeyDown;
+                    _mineKeyDown = -1;
+                    if (chosen > maxMines) return false; // invalido, esperar de nuevo
+                    MinesUsedThisTurn = chosen;
+                    return true;
+                });
+
+                // Reducir el total del dado
+                LastDiceTotal -= MinesUsedThisTurn;
+                OnStatus?.Invoke(
+                    $"Usas {MinesUsedThisTurn} mina(s). Avanzo: {LastDiceTotal}  |  Elige ficha [1-4]");
+            }
+            else
+            {
+                // No tiene minas o el dado es 1, saltar la fase
+                MinesUsedThisTurn = 0;
+                OnStatus?.Invoke($"Resultado: {total}  |  Elige ficha [1-4]");
+            }
+
+            // ── Esperar eleccion de ficha (teclas 1-4) ──
+            CurrentPhase  = Phase.TurnWaitPiece;
             _pieceKeyDown = -1;
             _movingPiece  = null;
             yield return new WaitUntil(() =>
@@ -219,21 +282,33 @@ void BuildPlayers()
                 if (idx >= pool.Length || pool[idx] == null) return false;
 
                 PieceController chosen = pool[idx];
-                // No puede moverse si ya está moviendose
                 if (chosen.IsMoving()) return false;
 
-                // Resaltar
                 HighlightedPiece = chosen;
                 OnPieceHighlighted?.Invoke(chosen);
                 _movingPiece = chosen;
                 return true;
             });
 
+            // ── Guardar posicion antes de mover y colocar minas ──
+            _pieceTrackBeforeMove = _movingPiece.IsAtHome
+                ? BoardManager.Instance.GetStartIndex(current.Color)
+                : _movingPiece.TrackIndex;
+
+            if (MinesUsedThisTurn > 0 && MineSystem.Instance != null)
+            {
+                // fullRoll = LastDiceTotal + MinesUsedThisTurn (el valor original antes de reducir)
+                int fullRoll = LastDiceTotal + MinesUsedThisTurn;
+                MineSystem.Instance.PlaceMines(current.Color, _pieceTrackBeforeMove, fullRoll, MinesUsedThisTurn);
+                int remaining = MineSystem.Instance.GetMinesRemaining(current.Color);
+                OnStatus?.Invoke($"Mina(s) colocada(s)! Te quedan {remaining} minas. Moviendo...");
+            }
+
             // ── Mover ficha ──
             CurrentPhase = Phase.TurnMoving;
-            OnStatus?.Invoke($"Moviendo {HighlightedPiece.name}...");
+            if (MinesUsedThisTurn == 0)
+                OnStatus?.Invoke($"Moviendo {HighlightedPiece.name}...");
 
-            // Suscribir vuelta
             Action<int> lapH = null;
             lapH = _ => { GameManager.Instance.OnLapCompleted(current); _movingPiece.OnLapCompleted -= lapH; };
             _movingPiece.OnLapCompleted += lapH;
@@ -243,10 +318,24 @@ void BuildPlayers()
 
             yield return new WaitUntil(() => !_movingPiece.IsMoving());
 
+            // ── Revisar minas (antes que kills, ya que la mina manda a casa) ──
+            if (MineSystem.Instance != null && !_movingPiece.IsAtHome)
+            {
+                bool hitMine = MineSystem.Instance.CheckAndTriggerMine(_movingPiece, current);
+                if (hitMine)
+                {
+                    int mineOwnerColor = -1; // ya gestionado dentro de CheckAndTriggerMine
+                    OnStatus?.Invoke($"{current.Name} piso una mina! -2 puntos. Vuelve a casa.");
+                    yield return new WaitForSeconds(1.5f);
+                    // No hacer CheckKills si fue enviado a casa por la mina
+                    goto EndTurn;
+                }
+            }
+
             // ── Revisar kills ──
             CheckKills(current, _movingPiece);
 
-            // ── Fin turno ──
+            EndTurn:
             HighlightedPiece = null;
             OnPieceHighlighted?.Invoke(null);
             _turnIndex = (_turnIndex + 1) % _players.Count;
@@ -255,11 +344,11 @@ void BuildPlayers()
         }
 
         CurrentPhase = Phase.GameOver;
-        OnStatus?.Invoke($"¡{GameManager.Instance.Winner?.Name} GANÓ LA PARTIDA!");
+        OnStatus?.Invoke($"!{GameManager.Instance.Winner?.Name} GANO LA PARTIDA!");
     }
 
     // ─────────────────────────────────────────────
-    // API PÚBLICA (llamado desde botón UI si existe)
+    // API PUBLICA
     // ─────────────────────────────────────────────
     public void RollDice() { if (CurrentPhase == Phase.TurnWaitRoll) _spaceDown = true; }
 
@@ -280,7 +369,7 @@ void BuildPlayers()
                 {
                     SendHome(dp, def);
                     GameManager.Instance.OnPieceKilled(attacker);
-                    OnStatus?.Invoke($"{attacker.Name} capturó ficha de {def.Name}! +1 pto");
+                    OnStatus?.Invoke($"{attacker.Name} capturo ficha de {def.Name}! +1 pto");
                 }
             }
         }

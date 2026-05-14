@@ -35,6 +35,15 @@ public class GameUI : MonoBehaviour
             btnReturnMenu.onClick.AddListener(() =>
                 UnityEngine.SceneManagement.SceneManager.LoadScene(menuSceneName));
 
+        // Aumentar el tamaño del texto existente dinámicamente
+        TextMeshProUGUI[] allTexts = GetComponentsInChildren<TextMeshProUGUI>(true);
+        foreach(var t in allTexts)
+        {
+            t.fontSize += 10;
+        }
+
+        CreateControlPanel();
+
         // Suscribir eventos — nombres del NUEVO TurnManager
         TurnManager.Instance.OnStatus       += OnStatus;
         TurnManager.Instance.OnTurnStart    += OnTurnStart;
@@ -114,5 +123,79 @@ public class GameUI : MonoBehaviour
             else
                 txtScores[i].text = "";
         }
+    }
+
+    // ── Botones de Control Generados Dinámicamente ──
+    void CreateControlPanel()
+    {
+        // El Panel de Control se crea directamente sobre el Canvas para evitar problemas de layout
+        GameObject panelObj = new GameObject("ControlPanel_Generated");
+        panelObj.transform.SetParent(this.transform.parent, false); // Parent to GameCanvas
+        
+        RectTransform rt = panelObj.AddComponent<RectTransform>();
+        // Anclado a la izquierda, debajo del Panel_TurnInfo (que suele estar arriba a la izquierda)
+        rt.anchorMin = new Vector2(0f, 0.2f);
+        rt.anchorMax = new Vector2(0.25f, 0.75f);
+        rt.pivot = new Vector2(0f, 1f);
+        rt.anchoredPosition = new Vector2(15, -10);
+        rt.sizeDelta = Vector2.zero;
+
+        VerticalLayoutGroup layout = panelObj.AddComponent<VerticalLayoutGroup>();
+        layout.childAlignment = TextAnchor.UpperLeft;
+        layout.spacing = 12;
+        layout.childControlHeight = false;
+        layout.childControlWidth = false;
+
+        // Botón Tirar Dado
+        CreateButton(panelObj.transform, "Tirar Dado", () => {
+            if (TurnManager.Instance != null) TurnManager.Instance.RollDice();
+        }, new Color(0.2f, 0.7f, 0.2f, 0.95f));
+
+        for (int i = 0; i < 4; i++)
+        {
+            int pieceIndex = i;
+            CreateButton(panelObj.transform, $"Mover Ficha {i+1}", () => {
+                if (TurnManager.Instance != null) TurnManager.Instance.SelectPiece(pieceIndex);
+            }, new Color(0.1f, 0.4f, 0.8f, 0.95f));
+        }
+
+        // Botones de Minas
+        CreateButton(panelObj.transform, "Usar Mina (Resta 1)", () => {
+            if (TurnManager.Instance != null) TurnManager.Instance.SelectMines(1);
+        }, new Color(0.8f, 0.2f, 0.2f, 0.95f));
+
+        CreateButton(panelObj.transform, "No usar Mina (Pasar)", () => {
+            if (TurnManager.Instance != null) TurnManager.Instance.SelectMines(0);
+        }, new Color(0.4f, 0.4f, 0.4f, 0.95f));
+    }
+
+    void CreateButton(Transform parent, string label, UnityEngine.Events.UnityAction action, Color? color = null)
+    {
+        GameObject btnObj = new GameObject("Btn_" + label);
+        btnObj.transform.SetParent(parent, false);
+
+        Image bg = btnObj.AddComponent<Image>();
+        bg.color = color ?? new Color(0.1f, 0.4f, 0.8f, 0.95f);
+
+        Button btn = btnObj.AddComponent<Button>();
+        btn.onClick.AddListener(action);
+
+        LayoutElement le = btnObj.AddComponent<LayoutElement>();
+        le.minWidth = 120;
+        le.minHeight = 60;
+
+        GameObject txtObj = new GameObject("Text");
+        txtObj.transform.SetParent(btnObj.transform, false);
+        TextMeshProUGUI txt = txtObj.AddComponent<TextMeshProUGUI>();
+        txt.text = label;
+        txt.fontSize = 24;
+        txt.alignment = TextAlignmentOptions.Center;
+        txt.color = Color.white;
+        
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.offsetMin = Vector2.zero;
+        txtRt.offsetMax = Vector2.zero;
     }
 }

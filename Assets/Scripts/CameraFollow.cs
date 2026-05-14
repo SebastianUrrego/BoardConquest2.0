@@ -143,9 +143,10 @@ public class CameraFollow : MonoBehaviour
     // ── MODO TABLERO: orbital suave ───────────────
     void UpdateBoard()
     {
-        if (_currentPlayer == null) return;
+        PlayerData p = GetActivePlayerForCamera();
+        if (p == null) return;
 
-        Vector3 midpoint = GetMidpoint(_currentPlayer.Pieces);
+        Vector3 midpoint = GetMidpoint(p.Pieces);
         Vector3 center   = new Vector3(boardCenterX, 0, boardCenterZ);
         Vector3 dir      = (midpoint - center);
         dir.y = 0;
@@ -207,6 +208,13 @@ public class CameraFollow : MonoBehaviour
 
     // ── Helpers de posición ───────────────────────
 
+    PlayerData GetActivePlayerForCamera()
+    {
+        if (TurnManager.Instance != null && TurnManager.Instance.InitialTurnPlayer != null)
+            return TurnManager.Instance.InitialTurnPlayer;
+        return _currentPlayer;
+    }
+
     /// Posición de zoom: detrás y arriba de la ficha
     Vector3 CalcZoomPos()
     {
@@ -230,8 +238,9 @@ public class CameraFollow : MonoBehaviour
 
     Vector3 CalcBoardPos()
     {
-        if (_currentPlayer == null) return transform.position;
-        Vector3 midpoint = GetMidpoint(_currentPlayer.Pieces);
+        PlayerData p = GetActivePlayerForCamera();
+        if (p == null) return transform.position;
+        Vector3 midpoint = GetMidpoint(p.Pieces);
         Vector3 center   = new Vector3(boardCenterX, 0, boardCenterZ);
         Vector3 dir = (midpoint - center); dir.y = 0;
         if (dir.sqrMagnitude < 0.1f) dir = Vector3.forward;
@@ -241,8 +250,9 @@ public class CameraFollow : MonoBehaviour
 
     Quaternion CalcBoardRot(Vector3 fromPos)
     {
-        Vector3 midpoint = _currentPlayer != null
-            ? GetMidpoint(_currentPlayer.Pieces)
+        PlayerData p = GetActivePlayerForCamera();
+        Vector3 midpoint = p != null
+            ? GetMidpoint(p.Pieces)
             : new Vector3(boardCenterX, 0, boardCenterZ);
         return Quaternion.LookRotation(midpoint - fromPos);
     }

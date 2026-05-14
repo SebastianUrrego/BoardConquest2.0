@@ -83,11 +83,30 @@ public class TurnManager : MonoBehaviour
     {
         yield return null;
         BuildPlayers();
+        TeleportAllPiecesToHome();
         StartCoroutine(PhaseInitialRoll());
+    }
+
+    void TeleportAllPiecesToHome()
+    {
+        foreach (var p in _players)
+        {
+            var homes = BoardManager.Instance.GetHomeSquares(p.Color);
+            if (homes == null) continue;
+            for (int i = 0; i < p.Pieces.Length; i++)
+            {
+                if (p.Pieces[i] != null && i < homes.Length && homes[i] != null)
+                {
+                    p.Pieces[i].transform.position = homes[i].position;
+                    p.Pieces[i].ResetToHome();
+                }
+            }
+        }
     }
 
     void Update()
     {
+        /* Teclado desactivado a petición del usuario
         if (Input.GetKeyDown(KeyCode.Space)) _spaceDown = true;
 
         // Seleccion de ficha (1-4) — solo fuera de la fase de minas
@@ -108,6 +127,7 @@ public class TurnManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) _mineKeyDown = 3;
             if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) _mineKeyDown = 4;
         }
+        */
     }
 
     // ─────────────────────────────────────────────
@@ -350,7 +370,11 @@ public class TurnManager : MonoBehaviour
     // ─────────────────────────────────────────────
     // API PUBLICA
     // ─────────────────────────────────────────────
-    public void RollDice() { if (CurrentPhase == Phase.TurnWaitRoll) _spaceDown = true; }
+    public void RollDice() { if (CurrentPhase == Phase.TurnWaitRoll || CurrentPhase == Phase.InitialWait) _spaceDown = true; }
+
+    public void SelectPiece(int index) { if (CurrentPhase == Phase.TurnWaitPiece) _pieceKeyDown = index; }
+
+    public void SelectMines(int count) { if (CurrentPhase == Phase.TurnWaitMines) _mineKeyDown = count; }
 
     // ─────────────────────────────────────────────
     // SISTEMA DE MATAR

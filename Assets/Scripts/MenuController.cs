@@ -26,6 +26,9 @@ public class MenuController : MonoBehaviour
     [Tooltip("El boton de Jugar")]
     public Button playButton;
 
+    [Tooltip("El boton de Salir")]
+    public Button quitButton;
+
     [Header("=== CONFIGURACION ===")]
     [Tooltip("Nombre de la escena de juego a cargar (si este script esta en el menu principal)")]
     public string gameSceneName = "SampleScene";
@@ -38,6 +41,29 @@ public class MenuController : MonoBehaviour
         // Conectar el boton automaticamente si no se hizo en el Inspector
         if (playButton != null)
             playButton.onClick.AddListener(OnPlayClicked);
+        else 
+        {
+            GameObject btn = GameObject.Find("BotonJugar");
+            if (btn != null)
+            {
+                playButton = btn.GetComponent<Button>();
+                if (playButton != null)
+                    playButton.onClick.AddListener(OnPlayClicked);
+            }
+        }
+
+        if (quitButton != null)
+            quitButton.onClick.AddListener(QuitGame);
+        else
+        {
+            GameObject btn = GameObject.Find("BotonSalir");
+            if (btn != null)
+            {
+                quitButton = btn.GetComponent<Button>();
+                if (quitButton != null)
+                    quitButton.onClick.AddListener(QuitGame);
+            }
+        }
 
         // Asegurarse de que el panel arranque visible
         if (menuPanel != null)

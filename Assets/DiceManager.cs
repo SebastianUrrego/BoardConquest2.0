@@ -78,7 +78,9 @@ public class DiceManager : MonoBehaviour
     /// </summary>
     public void RollAll()
     {
-        if (_isRolling) return;
+        // Reset forzado por si una tirada anterior quedó bloqueada
+        _isRolling = false;
+        StopAllCoroutines();
         StartCoroutine(RollBothRoutine());
     }
 
@@ -108,8 +110,12 @@ public class DiceManager : MonoBehaviour
         // Lanzar dado 2
         dice2.Roll();
 
-        // Esperar a que ambos terminen
-        yield return new WaitUntil(() => dice1Done && dice2Done);
+        // Esperar a que ambos terminen (timeout 4s para evitar bloqueos)
+        float _elapsed = 0f;
+        while (!(dice1Done && dice2Done) && _elapsed < 4f)
+        { _elapsed += Time.deltaTime; yield return null; }
+        if (!dice1Done) _dice1Result = UnityEngine.Random.Range(1, 7);
+        if (!dice2Done) _dice2Result = UnityEngine.Random.Range(1, 7);
 
         // Desuscribirse
         dice1.OnRollComplete -= (val) => { _dice1Result = val; dice1Done = true; };

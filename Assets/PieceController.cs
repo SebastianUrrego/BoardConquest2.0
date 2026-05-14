@@ -105,11 +105,6 @@ public class PieceController : MonoBehaviour
     // ─────────────────────────────────────────────
     private IEnumerator JumpTo(Vector3 from, Vector3 to, Action onArrived)
     {
-        // Orientar hacia destino
-        Vector3 dir = to - from; dir.y = 0;
-        if (dir != Vector3.zero)
-            transform.rotation = Quaternion.LookRotation(dir);
-
         float elapsed = 0f;
         while (elapsed < jumpDuration)
         {

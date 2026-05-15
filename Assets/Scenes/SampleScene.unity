@@ -410,6 +410,7 @@ GameObject:
   - component: {fileID: 53512756}
   - component: {fileID: 53512758}
   - component: {fileID: 53512757}
+  - component: {fileID: 53512759}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -426,8 +427,8 @@ Transform:
   m_GameObject: {fileID: 53512755}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2143803552}
@@ -503,6 +504,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &53512759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 53512755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1 &54151996
 GameObject:
   m_ObjectHideFlags: 0
@@ -1881,6 +1894,7 @@ GameObject:
   - component: {fileID: 236728862}
   - component: {fileID: 236728864}
   - component: {fileID: 236728863}
+  - component: {fileID: 236728865}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -1897,8 +1911,8 @@ Transform:
   m_GameObject: {fileID: 236728861}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 326405247}
@@ -1974,6 +1988,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &236728865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 236728861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &238338995
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2744,6 +2770,7 @@ GameObject:
   - component: {fileID: 301449471}
   - component: {fileID: 301449473}
   - component: {fileID: 301449472}
+  - component: {fileID: 301449474}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -2760,8 +2787,8 @@ Transform:
   m_GameObject: {fileID: 301449470}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 281186412}
@@ -2837,6 +2864,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &301449474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301449470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &304503937
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3281,7 +3320,7 @@ MonoBehaviour:
   boardCenterX: -2.43
   boardCenterZ: -0.28
   cameraHeight: 6
-  distanceBack: -6
+  distanceBack: -9
   fov: 60
   boardSmoothSpeed: 3
   zoomHeight: 4.5
@@ -5729,6 +5768,7 @@ GameObject:
   - component: {fileID: 501555794}
   - component: {fileID: 501555796}
   - component: {fileID: 501555795}
+  - component: {fileID: 501555797}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -5745,8 +5785,8 @@ Transform:
   m_GameObject: {fileID: 501555793}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1273345217}
@@ -5822,6 +5862,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &501555797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501555793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &507144533
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8408,6 +8460,7 @@ GameObject:
   - component: {fileID: 769720946}
   - component: {fileID: 769720948}
   - component: {fileID: 769720947}
+  - component: {fileID: 769720949}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -8424,8 +8477,8 @@ Transform:
   m_GameObject: {fileID: 769720945}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 213742820}
@@ -8501,6 +8554,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &769720949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 769720945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &780498669
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9291,6 +9356,7 @@ GameObject:
   - component: {fileID: 851108132}
   - component: {fileID: 851108134}
   - component: {fileID: 851108133}
+  - component: {fileID: 851108135}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -9307,8 +9373,8 @@ Transform:
   m_GameObject: {fileID: 851108131}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 519759876}
@@ -9384,6 +9450,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &851108135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851108131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1 &861271371
 GameObject:
   m_ObjectHideFlags: 0
@@ -10886,6 +10964,7 @@ GameObject:
   - component: {fileID: 977478572}
   - component: {fileID: 977478574}
   - component: {fileID: 977478573}
+  - component: {fileID: 977478575}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -10902,8 +10981,8 @@ Transform:
   m_GameObject: {fileID: 977478571}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1206589366}
@@ -10979,6 +11058,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &977478575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977478571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &977731889
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12376,6 +12467,7 @@ GameObject:
   - component: {fileID: 1052770426}
   - component: {fileID: 1052770428}
   - component: {fileID: 1052770427}
+  - component: {fileID: 1052770429}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -12392,8 +12484,8 @@ Transform:
   m_GameObject: {fileID: 1052770425}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 810875563}
@@ -12469,6 +12561,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1052770429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052770425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1 &1077317606
 GameObject:
   m_ObjectHideFlags: 0
@@ -13124,6 +13228,7 @@ GameObject:
   - component: {fileID: 1197744264}
   - component: {fileID: 1197744266}
   - component: {fileID: 1197744265}
+  - component: {fileID: 1197744267}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -13140,8 +13245,8 @@ Transform:
   m_GameObject: {fileID: 1197744263}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 479115999}
@@ -13217,6 +13322,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1197744267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1197744263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1 &1197777570
 GameObject:
   m_ObjectHideFlags: 0
@@ -16223,6 +16340,7 @@ GameObject:
   - component: {fileID: 1387287067}
   - component: {fileID: 1387287069}
   - component: {fileID: 1387287068}
+  - component: {fileID: 1387287070}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -16239,8 +16357,8 @@ Transform:
   m_GameObject: {fileID: 1387287066}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 613151129}
@@ -16316,6 +16434,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1387287070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387287066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &1390247909
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16467,6 +16597,7 @@ GameObject:
   - component: {fileID: 1396767993}
   - component: {fileID: 1396767995}
   - component: {fileID: 1396767994}
+  - component: {fileID: 1396767996}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -16483,8 +16614,8 @@ Transform:
   m_GameObject: {fileID: 1396767992}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 438488492}
@@ -16560,6 +16691,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1396767996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1396767992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1 &1400849696
 GameObject:
   m_ObjectHideFlags: 0
@@ -18347,6 +18490,7 @@ GameObject:
   - component: {fileID: 1539570281}
   - component: {fileID: 1539570283}
   - component: {fileID: 1539570282}
+  - component: {fileID: 1539570284}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -18363,8 +18507,8 @@ Transform:
   m_GameObject: {fileID: 1539570280}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1855039343}
@@ -18440,6 +18584,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1539570284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1539570280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &1541804050
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20350,6 +20506,7 @@ GameObject:
   - component: {fileID: 1707011439}
   - component: {fileID: 1707011441}
   - component: {fileID: 1707011440}
+  - component: {fileID: 1707011442}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -20366,8 +20523,8 @@ Transform:
   m_GameObject: {fileID: 1707011438}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 166514909}
@@ -20443,6 +20600,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1707011442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1707011438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &1709010749
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21804,6 +21973,7 @@ GameObject:
   - component: {fileID: 1848684328}
   - component: {fileID: 1848684330}
   - component: {fileID: 1848684329}
+  - component: {fileID: 1848684331}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -21820,8 +21990,8 @@ Transform:
   m_GameObject: {fileID: 1848684327}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1269355895}
@@ -21897,6 +22067,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1848684331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1848684327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1 &1855039342 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 28956d74be749e6438ff1a31a1387605, type: 3}
@@ -24691,6 +24873,7 @@ GameObject:
   - component: {fileID: 2123663852}
   - component: {fileID: 2123663854}
   - component: {fileID: 2123663853}
+  - component: {fileID: 2123663855}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -24707,8 +24890,8 @@ Transform:
   m_GameObject: {fileID: 2123663851}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1496433087}
@@ -24784,6 +24967,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2123663855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2123663851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1001 &2139697336
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25167,6 +25362,7 @@ GameObject:
   - component: {fileID: 2144182264}
   - component: {fileID: 2144182266}
   - component: {fileID: 2144182265}
+  - component: {fileID: 2144182267}
   m_Layer: 0
   m_Name: NumeroFicha
   m_TagString: Untagged
@@ -25183,8 +25379,8 @@ Transform:
   m_GameObject: {fileID: 2144182263}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0.0001, z: 0.0083}
+  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1966681503}
@@ -25260,6 +25456,18 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2144182267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144182263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd58bc170689f474286ffb6418e59d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardText
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

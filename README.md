@@ -4,24 +4,20 @@
   <img src="https://github.com/user-attachments/assets/450326cf-a385-4298-93a0-bc8891c8d14f" width="700"/>
 </p>
 
-### ✅ Funcionalidades implementadas
+### ✅ Funcionalidades Implementadas
 
-- Sistema básico de turnos entre jugadores  
-- Lanzamiento de dados  
-- Selección de fichas mediante teclado  
-- Movimiento básico en el tablero  
-- Sistema de eliminación de fichas (matar)  
-- Sistema de puntos inicial  
-
----
-
-### ⚠️ Bugs actuales
-
-- ❌ Las fichas no se están visualizando correctamente en escena  
-- ❌ Problemas con la cámara (seguimiento o posicionamiento incorrecto)  
+- **Menú Principal Dinámico:** Configuración de partida para elegir entre 2 a 4 jugadores con selección de color de equipo.
+- **Sistema de Turnos:** Manejo de fases (espera, lanzar dados, mover).
+- **Interfaz de Juego (UI):** 
+  - Generación dinámica de botones para mover las fichas.
+  - Panel de puntuación actualizado en tiempo real.
+  - **Match Info:** Historial cronológico que muestra las acciones recientes (tiros de dados, capturas, vueltas completas).
+- **Mecánicas de Movimiento:** Flujo de salida de la base y recorrido por el tablero.
+- **Sistema de Captura (Matar):** Caer sobre la ficha de un oponente la envía de vuelta a su base y otorga **1 punto**.
+- **Sistema de Vueltas:** Dar una vuelta completa al tablero y volver al punto de inicio otorga **3 puntos**.
 
 ---
 
-### 🚧 Estado actual
+### 🚧 Pendiente / En Desarrollo
 
-El proyecto ya cuenta con una base funcional del gameplay principal, pero aún requiere correcciones visuales y de cámara para mejorar la experiencia del jugador.
+- 💣 **Sistema de Minas:** Funcionalidad para colocar y detonar minas en el tablero. (Botones de UI listos, falta implementación lógica).

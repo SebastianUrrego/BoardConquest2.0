@@ -43,6 +43,7 @@ public class GameUI : MonoBehaviour
         }
 
         CreateControlPanel();
+        CreateMatchInfoPanel();
 
         // Suscribir eventos — nombres del NUEVO TurnManager
         TurnManager.Instance.OnStatus       += OnStatus;
@@ -84,6 +85,16 @@ public class GameUI : MonoBehaviour
     void OnStatus(string msg)
     {
         if (txtStatus != null) txtStatus.text = msg;
+
+        // Añadir al historial
+        string timeStr = System.DateTime.Now.ToString("HH:mm:ss");
+        matchHistory.Add($"<color=#aaaaaa>[{timeStr}]</color> {msg}");
+        if (matchHistory.Count > 10) matchHistory.RemoveAt(0); // keep last 10 entries
+        
+        if (txtMatchInfo != null)
+        {
+            txtMatchInfo.text = "<b>HISTORIAL</b>\n<size=80%>" + string.Join("\n", matchHistory) + "</size>";
+        }
     }
 
     void OnTurnStart(PlayerData p)
@@ -167,6 +178,44 @@ public class GameUI : MonoBehaviour
         CreateButton(panelObj.transform, "No usar Mina (Pasar)", () => {
             if (TurnManager.Instance != null) TurnManager.Instance.SelectMines(0);
         }, new Color(0.4f, 0.4f, 0.4f, 0.95f));
+    }
+
+    private TextMeshProUGUI txtMatchInfo;
+    private List<string> matchHistory = new List<string>();
+
+    void CreateMatchInfoPanel()
+    {
+        GameObject panelObj = new GameObject("MatchInfoPanel_Generated");
+        panelObj.transform.SetParent(this.transform.parent, false);
+
+        RectTransform rt = panelObj.AddComponent<RectTransform>();
+        // Anclado a la derecha, debajo del Panel_Scores
+        rt.anchorMin = new Vector2(0.79f, 0.1f);
+        rt.anchorMax = new Vector2(1f, 0.6f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = new Vector2(-16, 0);
+
+        Image bg = panelObj.AddComponent<Image>();
+        bg.color = new Color(0f, 0f, 0f, 0.65f);
+
+        GameObject txtObj = new GameObject("Text_MatchInfo");
+        txtObj.transform.SetParent(panelObj.transform, false);
+        
+        txtMatchInfo = txtObj.AddComponent<TextMeshProUGUI>();
+        txtMatchInfo.text = "<b>HISTORIAL</b>\n";
+        txtMatchInfo.fontSize = 20; // Will be increased by 10 in Start() since we call it before font increase? Wait, we need to make sure fontSize is good.
+        // Actually, if we create it after the foreach font increase, we just set the final size here.
+        txtMatchInfo.fontSize = 24; 
+        txtMatchInfo.alignment = TextAlignmentOptions.BottomLeft;
+        txtMatchInfo.color = Color.white;
+        txtMatchInfo.enableWordWrapping = true;
+        
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.offsetMin = new Vector2(15, 15);
+        txtRt.offsetMax = new Vector2(-15, -15);
     }
 
     void CreateButton(Transform parent, string label, UnityEngine.Events.UnityAction action, Color? color = null)

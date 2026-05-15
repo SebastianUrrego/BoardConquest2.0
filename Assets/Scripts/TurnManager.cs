@@ -358,8 +358,21 @@ public class TurnManager : MonoBehaviour
             lapH = _ => { GameManager.Instance.OnLapCompleted(current); _movingPiece.OnLapCompleted -= lapH; };
             _movingPiece.OnLapCompleted += lapH;
 
-            if (_movingPiece.IsAtHome) _movingPiece.LeaveHome();
-            else                       _movingPiece.Move(LastDiceTotal);
+            if (_movingPiece.IsAtHome) 
+            {
+                _movingPiece.LeaveHome();
+                yield return new WaitUntil(() => !_movingPiece.IsMoving());
+                
+                // Después de salir de casa, usar el resultado de los dados para avanzar
+                if (LastDiceTotal > 0)
+                {
+                    _movingPiece.Move(LastDiceTotal);
+                }
+            }
+            else
+            {
+                _movingPiece.Move(LastDiceTotal);
+            }
 
             yield return new WaitUntil(() => !_movingPiece.IsMoving());
 
@@ -406,7 +419,10 @@ public class TurnManager : MonoBehaviour
     // ─────────────────────────────────────────────
     void CheckKills(PlayerData attacker, PieceController ap)
     {
+        int total = BoardManager.Instance.TrackLength;
         int idx = ap.TrackIndex;
+        int idxWrapped = ((idx % total) + total) % total;
+
         if (IsSafe(idx)) return;
         foreach (var def in _players)
         {
@@ -414,11 +430,13 @@ public class TurnManager : MonoBehaviour
             foreach (var dp in def.Pieces)
             {
                 if (dp == null || dp.IsAtHome) continue;
-                if (dp.TrackIndex == idx)
+                
+                int defIdxWrapped = ((dp.TrackIndex % total) + total) % total;
+                if (defIdxWrapped == idxWrapped)
                 {
                     SendHome(dp, def);
                     GameManager.Instance.OnPieceKilled(attacker);
-                    OnStatus?.Invoke($"{attacker.Name} capturo ficha de {def.Name}! +1 pto");
+                    OnStatus?.Invoke($"{attacker.Name} capturó ficha de {def.Name}! +1 pto");
                 }
             }
         }

@@ -92,6 +92,19 @@ public class TurnManager : MonoBehaviour
     IEnumerator WaitOneFrameThenStart()
     {
         yield return null;
+
+        // ── Auto-crear MineSystem si no existe en la escena ──
+        if (MineSystem.Instance == null)
+        {
+            Debug.LogWarning("[TurnManager] MineSystem no encontrado en la escena. Creando automáticamente.");
+            new GameObject("MineSystem_Auto").AddComponent<MineSystem>();
+            yield return null; // esperar un frame para que Awake() se ejecute
+        }
+        else
+        {
+            Debug.Log("[TurnManager] MineSystem encontrado: " + MineSystem.Instance.name);
+        }
+
         BuildPlayers();
         TeleportAllPiecesToHome();
         StartCoroutine(PhaseInitialRoll());
@@ -276,27 +289,34 @@ public class TurnManager : MonoBehaviour
             DiceManager.Instance.OnDiceRollComplete -= h2;
             LastDiceTotal = total;
 
-            // ── Fase de minas: el jugador decide cuantas usar ──
+            // ── Fase de minas: el jugador decide cuántas usar ──
+            int available = MineSystem.Instance != null
+                ? MineSystem.Instance.GetMinesRemaining(current.Color)
+                : 0;
             int maxMines = MineSystem.Instance != null
                 ? MineSystem.Instance.MaxMinesToUse(current.Color, total)
                 : 0;
+
+            // LOG DE DIAGNÓSTICO — visible en la consola de Unity
+            string msStat = MineSystem.Instance != null ? "OK" : "NULL";
+            Debug.Log($"[TurnManager] Fase minas — Dado:{total} | Minas disponibles:{available} | Max usables:{maxMines} | MineSystem:{msStat}");
+
 
             if (maxMines > 0)
             {
                 CurrentPhase  = Phase.TurnWaitMines;
                 _mineKeyDown  = -1;
-                int minesLeft = MineSystem.Instance.GetMinesRemaining(current.Color);
                 OnStatus?.Invoke(
-                    $"Resultado: {total}  |  Minas disponibles: {minesLeft}  |  " +
-                    $"Usa [0-{maxMines}] minas (cada una resta 1 avance)");
+                    $"¡Es tu turno de minas! Dado: {total} | Minas: {available} | Puedes usar hasta {maxMines}\n" +
+                    $"Presiona [💣 Usar Mina] o [⏭ No usar Mina]");
 
-                // Esperar que el jugador presione una tecla valida
+                // Esperar que el jugador presione una tecla válida
                 yield return new WaitUntil(() =>
                 {
                     if (_mineKeyDown < 0) return false;
                     int chosen = _mineKeyDown;
                     _mineKeyDown = -1;
-                    if (chosen > maxMines) return false; // invalido, esperar de nuevo
+                    if (chosen > maxMines) { Debug.LogWarning($"[TurnManager] Minas elegidas ({chosen}) > máximo ({maxMines}). Ignorado."); return false; }
                     MinesUsedThisTurn = chosen;
                     return true;
                 });
@@ -304,13 +324,16 @@ public class TurnManager : MonoBehaviour
                 // Reducir el total del dado
                 LastDiceTotal -= MinesUsedThisTurn;
                 OnStatus?.Invoke(
-                    $"Usas {MinesUsedThisTurn} mina(s). Avanzo: {LastDiceTotal}  |  Elige ficha [1-4]");
+                    $"Usas {MinesUsedThisTurn} mina(s). Avanzas: {LastDiceTotal} casilla(s) | Elige ficha");
             }
             else
             {
-                // No tiene minas o el dado es 1, saltar la fase
+                // No tiene minas o el dado es 1 — saltar la fase
                 MinesUsedThisTurn = 0;
-                OnStatus?.Invoke($"Resultado: {total}  |  Elige ficha [1-4]");
+                string razon = MineSystem.Instance == null ? "(MineSystem no existe)" :
+                               available == 0             ? "(sin minas)"            :
+                               total <= 1                 ? "(dado = 1)"             : "";
+                OnStatus?.Invoke($"Resultado: {total} | Sin minas disponibles {razon} | Elige ficha");
             }
 
             // ── Esperar eleccion de ficha (teclas 1-4) ──
@@ -345,8 +368,13 @@ public class TurnManager : MonoBehaviour
                 // fullRoll = LastDiceTotal + MinesUsedThisTurn (el valor original antes de reducir)
                 int fullRoll = LastDiceTotal + MinesUsedThisTurn;
                 MineSystem.Instance.PlaceMines(current.Color, _pieceTrackBeforeMove, fullRoll, MinesUsedThisTurn);
+
+                // Instanciar el prefab visual de cada mina en el tablero
+                if (MinePlacer.Instance != null)
+                    MinePlacer.Instance.PlaceMinesVisual(current.Color, _pieceTrackBeforeMove, fullRoll, MinesUsedThisTurn);
+
                 int remaining = MineSystem.Instance.GetMinesRemaining(current.Color);
-                OnStatus?.Invoke($"Mina(s) colocada(s)! Te quedan {remaining} minas. Moviendo...");
+                OnStatus?.Invoke($"¡Mina(s) colocada(s)! Te quedan {remaining} minas. Moviendo...");
             }
 
             // ── Mover ficha ──
@@ -382,8 +410,10 @@ public class TurnManager : MonoBehaviour
                 bool hitMine = MineSystem.Instance.CheckAndTriggerMine(_movingPiece, current);
                 if (hitMine)
                 {
-                    int mineOwnerColor = -1; // ya gestionado dentro de CheckAndTriggerMine
-                    OnStatus?.Invoke($"{current.Name} piso una mina! -2 puntos. Vuelve a casa.");
+                    int stolen = MineSystem.Instance.pointsToSteal;
+                    OnStatus?.Invoke(
+                        $"¡{current.Name} pisó una mina! -{stolen} pts. " +
+                        $"Vuelve a casa.");
                     yield return new WaitForSeconds(1.5f);
                     // No hacer CheckKills si fue enviado a casa por la mina
                     goto EndTurn;

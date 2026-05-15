@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-<img width="700" height="584" alt="image" src="https://github.com/user-attachments/assets/6c813c15-890c-4e3d-b89c-6af5cb83f126" />
+<img width="700" height="300" alt="image" src="https://github.com/user-attachments/assets/6c813c15-890c-4e3d-b89c-6af5cb83f126" />
 </p>
 
 ### ✅ Funcionalidades Implementadas

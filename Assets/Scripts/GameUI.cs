@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 /// <summary>
 /// GameUI — HUD durante la partida.
@@ -60,9 +61,16 @@ public class GameUI : MonoBehaviour
     void Update()
     {
         // Actualizar resultado del dado en tiempo real
-        if (TurnManager.Instance == null || txtDiceResult == null) return;
-        int d = TurnManager.Instance.LastDiceTotal;
-        if (d > 0) txtDiceResult.text = $"Dados: {d}";
+        if (TurnManager.Instance == null) return;
+
+        if (txtDiceResult != null)
+        {
+            int d = TurnManager.Instance.LastDiceTotal;
+            if (d > 0) txtDiceResult.text = $"Dados: {d}";
+        }
+
+        // Actualizar estado de botones cada frame
+        RefreshButtonStates();
     }
 
     void OnDestroy()
@@ -136,15 +144,20 @@ public class GameUI : MonoBehaviour
         }
     }
 
+    // ── Referencias a botones para activar/desactivar ──
+    private Button _btnRoll;
+    private Button[] _btnPieces = new Button[4];
+    private Button _btnUseMine;
+    private Button _btnSkipMine;
+    private TextMeshProUGUI _txtMineCount;
+
     // ── Botones de Control Generados Dinámicamente ──
     void CreateControlPanel()
     {
-        // El Panel de Control se crea directamente sobre el Canvas para evitar problemas de layout
         GameObject panelObj = new GameObject("ControlPanel_Generated");
-        panelObj.transform.SetParent(this.transform.parent, false); // Parent to GameCanvas
-        
+        panelObj.transform.SetParent(this.transform.parent, false);
+
         RectTransform rt = panelObj.AddComponent<RectTransform>();
-        // Anclado a la izquierda, debajo del Panel_TurnInfo (que suele estar arriba a la izquierda)
         rt.anchorMin = new Vector2(0f, 0.2f);
         rt.anchorMax = new Vector2(0.25f, 0.75f);
         rt.pivot = new Vector2(0f, 1f);
@@ -157,27 +170,80 @@ public class GameUI : MonoBehaviour
         layout.childControlHeight = false;
         layout.childControlWidth = false;
 
-        // Botón Tirar Dado
-        CreateButton(panelObj.transform, "Tirar Dado", () => {
+        // ── Tirar Dado ──
+        _btnRoll = CreateButton(panelObj.transform, "🎲 Tirar Dado", () => {
             if (TurnManager.Instance != null) TurnManager.Instance.RollDice();
         }, new Color(0.2f, 0.7f, 0.2f, 0.95f));
 
+        // ── Mover Fichas ──
         for (int i = 0; i < 4; i++)
         {
             int pieceIndex = i;
-            CreateButton(panelObj.transform, $"Mover Ficha {i+1}", () => {
+            _btnPieces[i] = CreateButton(panelObj.transform, $"♟ Ficha {i+1}", () => {
                 if (TurnManager.Instance != null) TurnManager.Instance.SelectPiece(pieceIndex);
             }, new Color(0.1f, 0.4f, 0.8f, 0.95f));
         }
 
-        // Botones de Minas
-        CreateButton(panelObj.transform, "Usar Mina (Resta 1)", () => {
-            if (TurnManager.Instance != null) TurnManager.Instance.SelectMines(1);
-        }, new Color(0.8f, 0.2f, 0.2f, 0.95f));
+        // ── Contador de minas ──
+        GameObject lblObj = new GameObject("Lbl_MineCount");
+        lblObj.transform.SetParent(panelObj.transform, false);
+        _txtMineCount = lblObj.AddComponent<TextMeshProUGUI>();
+        _txtMineCount.text = "💣 Minas: -";
+        _txtMineCount.fontSize = 22;
+        _txtMineCount.color = new Color(1f, 0.8f, 0.2f);
+        LayoutElement le = lblObj.AddComponent<LayoutElement>();
+        le.minHeight = 30;
 
-        CreateButton(panelObj.transform, "No usar Mina (Pasar)", () => {
+        // ── Botones de Minas ──
+        _btnUseMine = CreateButton(panelObj.transform, "💣 Usar Mina (-1 casilla)", () => {
+            if (TurnManager.Instance != null) TurnManager.Instance.SelectMines(1);
+        }, new Color(0.75f, 0.15f, 0.1f, 0.95f));
+
+        _btnSkipMine = CreateButton(panelObj.transform, "⏭ No usar Mina", () => {
             if (TurnManager.Instance != null) TurnManager.Instance.SelectMines(0);
-        }, new Color(0.4f, 0.4f, 0.4f, 0.95f));
+        }, new Color(0.35f, 0.35f, 0.35f, 0.95f));
+
+        // Estado inicial: todo desactivado excepto el dado
+        RefreshButtonStates();
+    }
+
+    /// <summary>Activa/desactiva botones según la fase del turno.</summary>
+    void RefreshButtonStates()
+    {
+        if (TurnManager.Instance == null) return;
+        TurnManager.Phase phase = TurnManager.Instance.CurrentPhase;
+
+        bool waitRoll  = phase == TurnManager.Phase.TurnWaitRoll || phase == TurnManager.Phase.InitialWait;
+        bool waitMine  = phase == TurnManager.Phase.TurnWaitMines;
+        bool waitPiece = phase == TurnManager.Phase.TurnWaitPiece;
+
+        SetBtn(_btnRoll,     waitRoll);
+        SetBtn(_btnUseMine,  waitMine);
+        SetBtn(_btnSkipMine, waitMine);
+        foreach (var b in _btnPieces) SetBtn(b, waitPiece);
+
+        // Actualizar contador de minas
+        if (_txtMineCount != null && MineSystem.Instance != null)
+        {
+            var cur = TurnManager.Instance.CurrentPlayer;
+            if (cur != null)
+            {
+                int left = MineSystem.Instance.GetMinesRemaining(cur.Color);
+                _txtMineCount.text = $"💣 Minas: {left}";
+                _txtMineCount.color = left > 0 ? new Color(1f, 0.8f, 0.2f) : new Color(0.5f, 0.5f, 0.5f);
+            }
+        }
+    }
+
+    private void SetBtn(Button btn, bool interactable)
+    {
+        if (btn == null) return;
+        btn.interactable = interactable;
+        // Cambiar alpha visualmente para indicar desactivado
+        var img = btn.GetComponent<Image>();
+        if (img != null) img.color = new Color(img.color.r, img.color.g, img.color.b, interactable ? 0.95f : 0.35f);
+        var txt = btn.GetComponentInChildren<TextMeshProUGUI>();
+        if (txt != null) txt.color = interactable ? Color.white : new Color(1f,1f,1f,0.4f);
     }
 
     private TextMeshProUGUI txtMatchInfo;
@@ -218,33 +284,44 @@ public class GameUI : MonoBehaviour
         txtRt.offsetMax = new Vector2(-15, -15);
     }
 
-    void CreateButton(Transform parent, string label, UnityEngine.Events.UnityAction action, Color? color = null)
+    Button CreateButton(Transform parent, string label, UnityEngine.Events.UnityAction action, Color? color = null)
     {
         GameObject btnObj = new GameObject("Btn_" + label);
         btnObj.transform.SetParent(parent, false);
 
+        Color baseColor = color ?? new Color(0.1f, 0.4f, 0.8f, 0.95f);
         Image bg = btnObj.AddComponent<Image>();
-        bg.color = color ?? new Color(0.1f, 0.4f, 0.8f, 0.95f);
+        bg.color = baseColor;
 
         Button btn = btnObj.AddComponent<Button>();
         btn.onClick.AddListener(action);
 
+        // Colores de estado del botón
+        ColorBlock cb = btn.colors;
+        cb.normalColor      = baseColor;
+        cb.highlightedColor = new Color(Mathf.Min(baseColor.r + 0.15f, 1f), Mathf.Min(baseColor.g + 0.15f, 1f), Mathf.Min(baseColor.b + 0.15f, 1f), baseColor.a);
+        cb.pressedColor     = new Color(baseColor.r * 0.7f, baseColor.g * 0.7f, baseColor.b * 0.7f, baseColor.a);
+        cb.disabledColor    = new Color(baseColor.r, baseColor.g, baseColor.b, 0.35f);
+        btn.colors = cb;
+
         LayoutElement le = btnObj.AddComponent<LayoutElement>();
-        le.minWidth = 120;
-        le.minHeight = 60;
+        le.minWidth  = 120;
+        le.minHeight = 55;
 
         GameObject txtObj = new GameObject("Text");
         txtObj.transform.SetParent(btnObj.transform, false);
         TextMeshProUGUI txt = txtObj.AddComponent<TextMeshProUGUI>();
-        txt.text = label;
-        txt.fontSize = 24;
+        txt.text      = label;
+        txt.fontSize  = 21;
         txt.alignment = TextAlignmentOptions.Center;
-        txt.color = Color.white;
-        
+        txt.color     = Color.white;
+
         RectTransform txtRt = txtObj.GetComponent<RectTransform>();
         txtRt.anchorMin = Vector2.zero;
         txtRt.anchorMax = Vector2.one;
-        txtRt.offsetMin = Vector2.zero;
-        txtRt.offsetMax = Vector2.zero;
+        txtRt.offsetMin = new Vector2(4, 0);
+        txtRt.offsetMax = new Vector2(-4, 0);
+
+        return btn;
     }
 }

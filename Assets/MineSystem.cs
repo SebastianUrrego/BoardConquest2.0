@@ -29,6 +29,9 @@ public class MineSystem : MonoBehaviour
     // Evento: (ficha golpeada, dueño de la mina)
     public event Action<PieceController, PlayerColor> OnMineTriggered;
 
+    // Puntos que se transfieren al activarse una mina
+    public int pointsToSteal = 2;
+
     // ─────────────────────────────────────────────
     void Awake()
     {
@@ -116,21 +119,39 @@ public class MineSystem : MonoBehaviour
     // CHEQUEAR MINA AL ATERRIZAR
     // ─────────────────────────────────────────────
 
+    /// <summary>
+    /// Comprueba si la casilla donde cayó la ficha tiene una mina enemiga.
+    /// Si hay mina: quita puntos al que la pisó, da puntos al dueño de la mina
+    /// y envía la ficha al inicio (casa).
+    /// Devuelve true si se activó una mina.
+    /// </summary>
     public bool CheckAndTriggerMine(PieceController piece, PlayerData pieceOwner)
     {
         int wrapped = Wrap(piece.TrackIndex);
         if (!_activeMines.TryGetValue(wrapped, out PlayerColor mineOwner)) return false;
         if (mineOwner == pieceOwner.Color) return false; // no activas las tuyas
 
+        // Eliminar la mina del tablero
         _activeMines.Remove(wrapped);
-        Debug.Log($"[MineSystem] {pieceOwner.Name} piso mina de {mineOwner} en casilla {wrapped}. -2 puntos.");
+        Debug.Log($"[MineSystem] {pieceOwner.Name} pisó mina de {mineOwner} en casilla {wrapped}. -{pointsToSteal} pts.");
 
-        GameManager.Instance.RemovePoints(pieceOwner, 2);
+        // ── Quitar puntos a quien pisó la mina ──
+        GameManager.Instance.RemovePoints(pieceOwner, pointsToSteal);
 
+        // ── Dar puntos al dueño de la mina ──
+        var allPlayers = GameManager.Instance.GetPlayers();
+        PlayerData mineOwnerData = allPlayers?.Find(p => p.Color == mineOwner);
+        if (mineOwnerData != null)
+        {
+            GameManager.Instance.AddPoints(mineOwnerData, pointsToSteal);
+            Debug.Log($"[MineSystem] {mineOwnerData.Name} (dueño de la mina) recibe +{pointsToSteal} pts.");
+        }
+
+        // ── Enviar ficha a casa (visual + estado interno) ──
         var homeSquares = BoardManager.Instance.GetHomeSquares(pieceOwner.Color);
         if (homeSquares != null && piece.pieceIndex < homeSquares.Length && homeSquares[piece.pieceIndex] != null)
             piece.transform.position = homeSquares[piece.pieceIndex].position;
-        piece.SendMessage("ResetToHome", SendMessageOptions.DontRequireReceiver);
+        piece.ResetToHome();
 
         OnMineTriggered?.Invoke(piece, mineOwner);
         return true;

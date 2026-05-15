@@ -4,6 +4,10 @@
   <img src="https://github.com/user-attachments/assets/450326cf-a385-4298-93a0-bc8891c8d14f" width="700"/>
 </p>
 
+<p align="center">
+<img width="700" height="584" alt="image" src="https://github.com/user-attachments/assets/6c813c15-890c-4e3d-b89c-6af5cb83f126" />
+</p>
+
 ### ✅ Funcionalidades Implementadas
 
 - **Menú Principal Dinámico:** Configuración de partida para elegir entre 2 a 4 jugadores con selección de color de equipo.
@@ -17,7 +21,3 @@
 - **Sistema de Vueltas:** Dar una vuelta completa al tablero y volver al punto de inicio otorga **3 puntos**.
 
 ---
-
-### 🚧 Pendiente / En Desarrollo
-
-- 💣 **Sistema de Minas:** Funcionalidad para colocar y detonar minas en el tablero. (Botones de UI listos, falta implementación lógica).
